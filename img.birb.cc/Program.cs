@@ -101,7 +101,7 @@ app.MapPost("/upload", async Task<IResult> (HttpRequest request) =>
         }
 
         Console.WriteLine($"New File: {newFile.filename}");
-        return Results.Ok("img.birb.cc/" + newFile.hash);
+        return Results.Text("https://img.birb.cc/img/" + newFile.filename);
     });
 
 FileDB.Load();
