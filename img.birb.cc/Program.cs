@@ -91,13 +91,13 @@ app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) =>
     SXCU += "\"Name\": \"birb.cc\",";
     SXCU += "\"DestinationType\": \"ImageUploader\",\n";
     SXCU += "\"RequestMethod\": \"POST\",\n";
-    SXCU += "\"RequestURL\": \"https://localhost:7247/api/upload\",\n";
+    SXCU += "\"RequestURL\": \"https://img.birb.cc/api/upload\",\n";
     SXCU += "\"Body\": \"MultipartFormData\",\n";
     SXCU += "\"Arguments\": {\n";
     SXCU += $"\"api_key\": \"{newUser.APIKey}\"\n";
     SXCU += "},\n";
     SXCU += "\"FileFormName\": \"img\"\n";
-    SXCU += "}'";
+    SXCU += "}";
 
     return Results.Text(SXCU);
 
@@ -124,6 +124,18 @@ app.MapGet("/api/usr/", async Task<IResult> (HttpRequest request) =>
     }
 
     return Results.Ok(UserDB.GetDB().Select(x => x.UserToDTO()).ToList());
+});
+
+app.MapGet("/api/stats", async () =>
+{
+    Stats stats = new Stats();
+    stats.files = FileDB.GetDB().Count;
+    stats.users = UserDB.GetDB().Count;
+    DirectoryInfo dirInfo = new DirectoryInfo(@"img/");
+    stats.bytes = await Task.Run(() => dirInfo.EnumerateFiles("*", SearchOption.TopDirectoryOnly).Sum(file => file.Length));
+    stats.newest = FileDB.GetDB().Last().Timestamp;
+
+    return Results.Ok(stats);
 });
 
 app.MapPost("/api/upload", async Task<IResult> (HttpRequest request) =>
@@ -206,6 +218,14 @@ UserDB.Load();
 
 app.Run();
 
+public class Stats
+{
+    public long bytes { get; set; }
+    public long users { get; set; }
+    public long files { get; set; }
+    public DateTime newest { get; set; }
+}
+
 public static class FileDB
 {
     private static string path = "img.json";
@@ -272,9 +292,8 @@ public static class FileDB
         db.Remove(file);
         Save();
 
-        File.Delete(Environment.CurrentDirectory + "/img/" + file.filename);
+        File.Delete("img/" + file.filename);
         Console.WriteLine("Removed file" + file.filename);
-
     }
 }
 
