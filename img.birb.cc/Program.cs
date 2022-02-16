@@ -34,6 +34,75 @@ app.MapGet("/api/img/", async Task<IResult> (HttpRequest request) =>
     return Results.Ok(FileDB.GetDB());
 });
 
+app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) =>
+{
+    if (!request.HasFormContentType)
+    {
+        return Results.BadRequest();
+    }
+
+    var form = await request.ReadFormAsync();
+    var key = form.ToList().Find(key => key.Key == "api_key");
+
+    if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null || !UserDB.GetUserFromKey(key.Value).isAdmin) // invalid key
+    {
+        return Results.Unauthorized();
+    }
+
+    var username = form.ToList().Find(username => username.Key == "Username");
+    var UID = form.ToList().Find(UID => UID.Key == "UID");
+
+    string NewUsername;
+    int NewUID;
+
+    if ( string.IsNullOrEmpty(username.Value) || UserDB.GetUserFromUsername(username.Value) is not null )
+    {
+        return Results.BadRequest("Invalid Username");
+    }
+
+    NewUsername = username.Value;
+    
+    if ( string.IsNullOrEmpty(UID.Value) || UID.Key is null)
+    {
+        NewUID = UserDB.GetDB().Count + 1;
+    }
+    else
+    {
+        NewUID = int.Parse(UID.Value);
+        if (UserDB.GetUserFromUID(int.Parse(UID.Value)) is not null)
+        {
+            return Results.BadRequest("UID Taken");
+        }
+    }
+
+    User newUser = new User
+    {
+        Username = NewUsername,
+        isAdmin = false,
+        UID = NewUID,
+        UploadCount = 0,
+        APIKey = User.newHash(40)
+    };
+
+    UserDB.AddUser(newUser);
+
+    string SXCU = "{\n";
+    SXCU += "\"Version\": \"13.7.0\",'\n";
+    SXCU += "\"Name\": \"birb.cc\",";
+    SXCU += "\"DestinationType\": \"ImageUploader\",\n";
+    SXCU += "\"RequestMethod\": \"POST\",\n";
+    SXCU += "\"RequestURL\": \"https://localhost:7247/api/upload\",\n";
+    SXCU += "\"Body\": \"MultipartFormData\",\n";
+    SXCU += "\"Arguments\": {\n";
+    SXCU += $"\"api_key\": \"{newUser.APIKey}\"\n";
+    SXCU += "},\n";
+    SXCU += "\"FileFormName\": \"img\"\n";
+    SXCU += "}'";
+
+    return Results.Text(SXCU);
+
+});
+
 app.MapGet("/api/usr/", async Task<IResult> (HttpRequest request) =>
 {
     if (!request.HasFormContentType)
@@ -47,6 +116,11 @@ app.MapGet("/api/usr/", async Task<IResult> (HttpRequest request) =>
     if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null) // invalid key
     {
         return Results.Unauthorized();
+    }
+
+    if (UserDB.GetUserFromKey(key.Value).isAdmin)
+    {
+        return Results.Ok(UserDB.GetDB());
     }
 
     return Results.Ok(UserDB.GetDB().Select(x => x.UserToDTO()).ToList());
@@ -92,7 +166,7 @@ app.MapPost("/api/upload", async Task<IResult> (HttpRequest request) =>
         }
 
         Console.WriteLine($"New File: {newFile.filename}");
-        return Results.Text("https://img.birb.cc/img/" + newFile.filename);
+        return Results.Text("https://img.birb.cc/" + newFile.filename);
     });
 
 app.MapDelete("/api/delete/{hash}", async Task<IResult> (HttpRequest request, string hash) =>
@@ -110,23 +184,21 @@ app.MapDelete("/api/delete/{hash}", async Task<IResult> (HttpRequest request, st
         return Results.Unauthorized();
     }
 
-    Img deleteFile = FileDB.Find(hash);
+    Img ?deleteFile = FileDB.Find(hash);
 
     if (deleteFile == null)
     {
         return Results.NotFound();
     }
 
-    if (deleteFile.UID != UserDB.GetUserFromKey(key.Value).UID)
+    if (deleteFile.UID == UserDB.GetUserFromKey(key.Value).UID || UserDB.GetUserFromKey(key.Value).isAdmin)
     {
-        return Results.Unauthorized();
+        FileDB.Remove(deleteFile);
+        return Results.Ok();
     }
 
-    FileDB.Remove(deleteFile);
-
-    return Results.Ok();
-
-
+    return Results.Unauthorized();
+ 
 });
 
 FileDB.Load();
@@ -214,11 +286,14 @@ public class Img
     public string? filename { get; set; }
     public int UID { get; set; }
 
+    public DateTime Timestamp { get; set; }
+
     public void NewImg(int uid, string extension)
     {
         this.hash = newHash(8);
         this.filename = this.hash + extension;
         this.UID = uid;
+        this.Timestamp = DateTime.Now;
 
         UserDB.GetUserFromUID(uid).UploadCount++;
         UserDB.Save();
@@ -249,6 +324,9 @@ public class Img
 
 public class User
 {
+    static Random random = new Random();
+
+    public bool isAdmin { get; set; }
     public string? Username { get; set; }
     public int UID { get; set; }
     public int UploadCount { get; set; } = 0;
@@ -262,6 +340,26 @@ public class User
             UID = this.UID,
             UploadCount = this.UploadCount
         };
+    }
+
+    public static string newHash(int length)
+    {
+        string b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        string hash = "";
+        bool used = true;
+
+        while (used)
+        {
+            hash = String.Empty;
+            for (int i = 0; i < length; i++)
+            {
+                hash += b64[random.Next(b64.Length)];
+            }
+
+            if (UserDB.GetUserFromKey(hash) is null) { used = false; }
+        }
+
+        return hash;
     }
 }
 
@@ -295,6 +393,7 @@ public static class UserDB
             Console.WriteLine($"Unable to load {path}");
         }
     }
+
     public static void Save()
     {
         try
@@ -311,21 +410,29 @@ public static class UserDB
         }
 
     }
+
+    public static void AddUser(User user)
+    {
+        db.Add(user);
+        Save();
+    }
+
     public static List<User> GetDB()
     {
         return db;
     }
+
     public static User? GetUserFromUsername(string username)
     {
         return db.Find(user => user.Username == username);
     }
 
-    public static User? GetUserFromUID(int uid)
+    public static User GetUserFromUID(int uid)
     {
         return db.Find(user => user.UID == uid);
     }
 
-    public static User? GetUserFromKey(string key)
+    public static User GetUserFromKey(string key)
     {
         return db.Find(user => user.APIKey == key);
     }
