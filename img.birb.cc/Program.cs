@@ -51,7 +51,7 @@ app.MapGet("/usr/", async Task<IResult> (HttpRequest request) =>
         return Results.Unauthorized();
     }
 
-    return Results.Ok(UserDB.GetDB());
+    return Results.Ok(UserDB.GetDB().Select(x => x.UserToDTO()).ToList());
 });
 
 app.MapGet("/{hash}", (string hash) =>
@@ -182,6 +182,7 @@ public class Img
         this.UID = uid;
 
         UserDB.GetUserFromUID(uid).UploadCount++;
+        UserDB.Save();
 
         FileDB.Add(this);
     }
@@ -212,22 +213,24 @@ public class User
     public string? Username { get; set; }
     public int UID { get; set; }
     public int UploadCount { get; set; } = 0;
+    public string? APIKey { get; set; }
 
-    private string? APIKey { get; set; }
-
-    public User(string username, int uid, int uploadcount, string apikey)
+    public UserDTO UserToDTO()
     {
-        this.Username = username;
-        this.UID = uid;
-        this.UploadCount = uploadcount;
-
-        this.APIKey = apikey;
+        return new UserDTO
+        {
+            Username = this.Username,
+            UID = this.UID,
+            UploadCount = this.UploadCount
+        };
     }
+}
 
-    public string GetKey()
-    {
-        return APIKey;
-    }
+public class UserDTO
+{
+    public string? Username { get; set; }
+    public int UID { get; set; }
+    public int UploadCount { get; set; } = 0;
 }
 
 public static class UserDB
@@ -253,7 +256,7 @@ public static class UserDB
             Console.WriteLine($"Unable to load {path}");
         }
     }
-    private static void Save()
+    public static void Save()
     {
         try
         {
@@ -285,6 +288,6 @@ public static class UserDB
 
     public static User? GetUserFromKey(string key)
     {
-        return db.Find(user => user.GetKey() == key);
+        return db.Find(user => user.APIKey == key);
     }
 }
