@@ -83,8 +83,8 @@ app.MapPost("/api/upload", async Task<IResult> (HttpRequest request) =>
         }
 
         Img newFile = new Img();
-        
-        newFile.NewImg(0, extension);
+
+        newFile.NewImg(UserDB.GetUserFromKey(key.Value).UID, extension);
 
         using (var stream = System.IO.File.Create("img/" + newFile.filename))
         {
@@ -94,6 +94,40 @@ app.MapPost("/api/upload", async Task<IResult> (HttpRequest request) =>
         Console.WriteLine($"New File: {newFile.filename}");
         return Results.Text("https://img.birb.cc/img/" + newFile.filename);
     });
+
+app.MapDelete("/api/delete/{hash}", async Task<IResult> (HttpRequest request, string hash) =>
+{
+    if (!request.HasFormContentType || string.IsNullOrEmpty(hash))
+    {
+        return Results.BadRequest();
+    }
+
+    var form = await request.ReadFormAsync();
+    var key = form.ToList().Find(key => key.Key == "api_key");
+
+    if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null) // invalid key
+    {
+        return Results.Unauthorized();
+    }
+
+    Img deleteFile = FileDB.Find(hash);
+
+    if (deleteFile == null)
+    {
+        return Results.NotFound();
+    }
+
+    if (deleteFile.UID != UserDB.GetUserFromKey(key.Value).UID)
+    {
+        return Results.Unauthorized();
+    }
+
+    FileDB.Remove(deleteFile);
+
+    return Results.Ok();
+
+
+});
 
 FileDB.Load();
 UserDB.Load();
@@ -109,10 +143,12 @@ public static class FileDB
     {
         return db;
     }
+
     public static Img? Find(string hash)
     {
         return db.Find(file => file.hash == hash);
     }
+
     public static void Add(Img file)
     {
         if (Find(file.hash) is null)
@@ -121,6 +157,7 @@ public static class FileDB
             Save();
         }
     }
+
     public static void Load()
     {
         try
@@ -139,6 +176,7 @@ public static class FileDB
             Console.WriteLine($"Unable to load {path}");
         }
     }
+
     private static void Save()
     {
 
@@ -154,6 +192,16 @@ public static class FileDB
         {
             Console.WriteLine($"Error saving {path}!");
         }
+
+    }
+
+    public static void Remove(Img file)
+    {
+        db.Remove(file);
+        Save();
+
+        File.Delete(Environment.CurrentDirectory + "/img/" + file.filename);
+        Console.WriteLine("Removed file" + file.filename);
 
     }
 }
