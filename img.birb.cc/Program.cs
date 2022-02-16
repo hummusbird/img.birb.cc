@@ -7,13 +7,6 @@ var app = builder.Build();
 
 string[] fileTypes = { ".jpg", ".jpeg", ".png", ".gif", ".mp4" };
 
-
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler();
-    app.UseHsts();
-}
-
 app.UseHttpsRedirection();
 
 app.MapGet("/", () => "Welcome to img.birb.cc");
