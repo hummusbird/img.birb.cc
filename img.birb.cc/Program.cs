@@ -1,5 +1,7 @@
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.HttpOverrides;
 using System.Web;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,11 +9,14 @@ var app = builder.Build();
 
 string[] fileTypes = { ".jpg", ".jpeg", ".png", ".gif", ".mp4" };
 
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+
 app.UseHttpsRedirection();
 
-app.MapGet("/", () => "Welcome to img.birb.cc");
-
-app.MapGet("/img/", async Task<IResult> (HttpRequest request) =>
+app.MapGet("/api/img/", async Task<IResult> (HttpRequest request) =>
 {
     if (!request.HasFormContentType)
     {
@@ -29,7 +34,7 @@ app.MapGet("/img/", async Task<IResult> (HttpRequest request) =>
     return Results.Ok(FileDB.GetDB());
 });
 
-app.MapGet("/usr/", async Task<IResult> (HttpRequest request) =>
+app.MapGet("/api/usr/", async Task<IResult> (HttpRequest request) =>
 {
     if (!request.HasFormContentType)
     {
@@ -47,14 +52,7 @@ app.MapGet("/usr/", async Task<IResult> (HttpRequest request) =>
     return Results.Ok(UserDB.GetDB().Select(x => x.UserToDTO()).ToList());
 });
 
-app.MapGet("/{hash}", (string hash) =>
-{
-    Img image = FileDB.Find(hash);
-    if (image == null) { return Results.NotFound("File not found"); }
-    return Results.Redirect("img/" + image.filename);
-});
-
-app.MapPost("/upload", async Task<IResult> (HttpRequest request) =>
+app.MapPost("/api/upload", async Task<IResult> (HttpRequest request) =>
     {
         if (!request.HasFormContentType)
         {
