@@ -17,6 +17,16 @@ app.UseHttpsRedirection();
 
 app.MapGet("/", () => "Welcome to img.birb.cc");
 
+app.MapGet("/img/", () =>
+{
+    return FileDB.GetDB();
+});
+
+app.MapGet("/usr/", () =>
+{
+    return UserDB.GetDB();
+});
+
 app.MapGet("/{hash}", (string hash) =>
 {
     Img image = FileDB.Find(hash);
@@ -24,20 +34,19 @@ app.MapGet("/{hash}", (string hash) =>
     return Results.Redirect("img/" + image.filename);
 });
 
-app.MapPost("/upload",
-    async Task<IResult> (HttpRequest request) =>
+app.MapPost("/upload", async Task<IResult> (HttpRequest request) =>
     {
         if (!request.HasFormContentType) { return Results.BadRequest(); }
 
         var form = await request.ReadFormAsync();
         var img = form.Files["img"];
-        
+
         if (img is null || img.Length == 0) // no file or no exention
         {
             return Results.BadRequest();
         }
 
-        Console.WriteLine($"New File: {img.FileName}");
+        
 
         string extension = Path.GetExtension(img.FileName);
 
@@ -46,37 +55,47 @@ app.MapPost("/upload",
             return Results.BadRequest("Invalid filetype or extension");
         }
 
-        Img newFile = new Img("hummusbird", extension);
+        Img newFile = new Img();
+        
+        newFile.NewImg(0, extension);
 
-        using (var stream = System.IO.File.Create("img/"+newFile.filename))
+        using (var stream = System.IO.File.Create("img/" + newFile.filename))
         {
             await img.CopyToAsync(stream);
         }
 
+        Console.WriteLine($"New File: {newFile.filename}");
         return Results.Ok("img.birb.cc/" + newFile.hash);
     });
 
 FileDB.Load();
+UserDB.Load();
 
 app.Run();
 
 public static class FileDB
 {
-    private static string path = "files.json";
-    private static List<Img> db = new List<Img>();
+    private static string path = "img.json";
+    private static List<Img>? db = new List<Img>();
 
+    public static List<Img>? GetDB()
+    {
+        return db;
+    }
     public static Img? Find(string hash)
     {
         return db.Find(file => file.hash == hash);
     }
     public static void Add(Img file)
     {
-        db.Add(file);
-        Save();
+        if (Find(file.hash) is null)
+        {
+            db.Add(file);
+            Save();
+        }
     }
     public static void Load()
     {
-
         try
         {
             using (StreamReader SR = new StreamReader(path))
@@ -84,47 +103,49 @@ public static class FileDB
                 string json = SR.ReadToEnd();
 
                 db = JsonConvert.DeserializeObject<List<Img>>(json);
+                Save();
             }
-
             Console.WriteLine($"Loaded DB of length {db.Count()}");
-            Save();
         }
-        catch (Exception Ex)
+        catch
         {
-            Console.WriteLine(Ex);
             Console.WriteLine($"Unable to load {path}");
         }
-
     }
     private static void Save()
     {
-        using (StreamWriter SW = new StreamWriter(path, false))
+
+        try
         {
-            try
+            using (StreamWriter SW = new StreamWriter(path, false))
             {
-                SW.WriteLine(JsonConvert.SerializeObject(db));
+                SW.WriteLine(JsonConvert.SerializeObject(db, Formatting.Indented));
                 Console.WriteLine($"{path} saved!");
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error saving {path}!\n{ex}");
-            }
         }
+        catch
+        {
+            Console.WriteLine($"Error saving {path}!");
+        }
+
     }
 }
 
 public class Img
 {
     static Random random = new Random();
-    public string? hash;
-    public string? filename;
-    public string? user;
 
-    public Img(string user, string extension)
+    public string? hash { get; set; }
+    public string? filename { get; set; }
+    public int UID { get; set; }
+
+    public void NewImg(int uid, string extension)
     {
         this.hash = newHash(8);
         this.filename = this.hash + extension;
-        this.user = user;
+        this.UID = uid;
+
+        UserDB.GetUserFromUID(uid).UploadCount++;
 
         FileDB.Add(this);
     }
@@ -150,3 +171,74 @@ public class Img
     }
 }
 
+public class User
+{
+    public string? Username { get; set; }
+    public int UID { get; set; }
+    public int UploadCount { get; set; } = 0;
+
+    private string? APIKey { get; set; }
+
+    public User(string username, int uid, int uploadcount, string apikey)
+    {
+        this.Username = username;
+        this.UID = uid;
+        this.UploadCount = uploadcount;
+
+        this.APIKey = apikey;
+    }
+}
+
+public static class UserDB
+{
+    private static string path = "user.json";
+    private static List<User> db = new List<User>();
+
+    public static void Load()
+    {
+        try
+        {
+            using (StreamReader SR = new StreamReader(path))
+            {
+                string json = SR.ReadToEnd();
+
+                db = JsonConvert.DeserializeObject<List<User>>(json);
+                Save();
+            }
+            Console.WriteLine($"Loaded DB of length {db.Count()}");
+        }
+        catch
+        {
+            Console.WriteLine($"Unable to load {path}");
+        }
+    }
+    private static void Save()
+    {
+        try
+        {
+            using (StreamWriter SW = new StreamWriter(path, false))
+            {
+                SW.WriteLine(JsonConvert.SerializeObject(db, Formatting.Indented));
+                Console.WriteLine($"{path} saved!");
+            }
+        }
+        catch
+        {
+            Console.WriteLine($"Error saving {path}!");
+        }
+
+    }
+    public static List<User> GetDB()
+    {
+        return db;
+    }
+    public static User? GetUserFromUsername(string username)
+    {
+        return db.Find(user => user.Username == username);
+    }
+
+    public static User? GetUserFromUID(int uid)
+    {
+        return db.Find(user => user.UID == uid);
+    }
+}
