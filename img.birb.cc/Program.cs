@@ -1,10 +1,11 @@
 using Newtonsoft.Json;
+using System.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var app = builder.Build();
 
-string[] fileTypes = { ".jpg", ".jpeg", ".png", ".gif" };
+string[] fileTypes = { ".jpg", ".jpeg", ".png", ".gif", ".mp4" };
 
 
 if (!app.Environment.IsDevelopment())
@@ -17,14 +18,40 @@ app.UseHttpsRedirection();
 
 app.MapGet("/", () => "Welcome to img.birb.cc");
 
-app.MapGet("/img/", () =>
+app.MapGet("/img/", async Task<IResult> (HttpRequest request) =>
 {
-    return FileDB.GetDB();
+    if (!request.HasFormContentType)
+    {
+        return Results.BadRequest();
+    }
+
+    var form = await request.ReadFormAsync();
+    var key = form.ToList().Find(key => key.Key == "api_key");
+
+    if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null) // invalid key
+    {
+        return Results.Unauthorized();
+    }
+
+    return Results.Ok(FileDB.GetDB());
 });
 
-app.MapGet("/usr/", () =>
+app.MapGet("/usr/", async Task<IResult> (HttpRequest request) =>
 {
-    return UserDB.GetDB();
+    if (!request.HasFormContentType)
+    {
+        return Results.BadRequest();
+    }
+
+    var form = await request.ReadFormAsync();
+    var key = form.ToList().Find(key => key.Key == "api_key");
+
+    if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null) // invalid key
+    {
+        return Results.Unauthorized();
+    }
+
+    return Results.Ok(UserDB.GetDB());
 });
 
 app.MapGet("/{hash}", (string hash) =>
@@ -36,17 +63,26 @@ app.MapGet("/{hash}", (string hash) =>
 
 app.MapPost("/upload", async Task<IResult> (HttpRequest request) =>
     {
-        if (!request.HasFormContentType) { return Results.BadRequest(); }
-
-        var form = await request.ReadFormAsync();
-        var img = form.Files["img"];
-
-        if (img is null || img.Length == 0) // no file or no exention
+        if (!request.HasFormContentType)
         {
             return Results.BadRequest();
         }
 
-        
+        var form = await request.ReadFormAsync();
+        var key = form.ToList().Find(key => key.Key == "api_key");
+
+        if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null) // invalid key
+        {
+            return Results.Unauthorized();
+        }
+
+        var img = form.Files["img"];
+
+        if (img is null || img.Length == 0) // no file or no exention
+        {
+            Console.WriteLine("Invalid upload");
+            return Results.BadRequest();
+        }
 
         string extension = Path.GetExtension(img.FileName);
 
@@ -187,6 +223,11 @@ public class User
 
         this.APIKey = apikey;
     }
+
+    public string GetKey()
+    {
+        return APIKey;
+    }
 }
 
 public static class UserDB
@@ -240,5 +281,10 @@ public static class UserDB
     public static User? GetUserFromUID(int uid)
     {
         return db.Find(user => user.UID == uid);
+    }
+
+    public static User? GetUserFromKey(string key)
+    {
+        return db.Find(user => user.GetKey() == key);
     }
 }
