@@ -36,8 +36,11 @@
         <h2>stats:</h2>
         <p id=files>-- files uploaded</p>
         <p id=users>-- registered users</p>
-        <p id=gb>-- bytes used</p>
-
-        <script>stats();</script>
+        <p id=gb>-- mb used</p>
+        <p id=time></p>
+        <script>
+            stats();
+            setInterval(stats, 60000)
+        </script>
     </div>
 </body>
