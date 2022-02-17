@@ -2,6 +2,8 @@
 
 C# image host.
 
+no, you cannot get an API key.
+
 ## how to host yourself
 
 - fork the repo. 
@@ -45,3 +47,4 @@ server {
 
 - change server_name, root and cert lines to your domain.
 - build the release using dotnet, then run the dll
+- modify user.json and create urself an admin user
