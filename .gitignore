@@ -11,7 +11,6 @@
 *.sln.docstates
 img.json
 user.json
-img/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

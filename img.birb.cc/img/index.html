@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script src="index.js"></script>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: "Consolas";
+        }
+
+        #q {
+            color: lightgray;
+        }
+
+        #a{
+            color: cyan;
+        }
+    </style>
+</head>
+<body>
+    <h1>welcome to img.birb.cc</h1>
+
+    <h2>faq:</h2>
+    <p id=q>- can i get an api key?</p>
+    <p id=a>no</p>
+
+    <p id=q>- how does it work?</p>
+    <a id=a href="https://github.com/hummusbird/img.birb.cc">like this</a>
+
+    <p id=q>- can i host this myself?</p>
+    <p id=a>sure</p>
+
+    <div id=stats>
+        <h2>stats:</h2>
+        <p id=files>-- files uploaded</p>
+        <p id=users>-- registered users</p>
+        <p id=gb>-- bytes used</p>
+
+        <script>stats();</script>
+    </div>
+</body>
