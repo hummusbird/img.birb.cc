@@ -1,5 +1,5 @@
 async function stats() {
-    let res = await fetch("https://img.birb.cc/api/stats")
+    let res = await fetch("api/stats")
     let parsed = await res.json()
     console.log(parsed)
     document.getElementById("users").innerHTML = parsed.users + " registered users"
