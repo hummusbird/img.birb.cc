@@ -1,9 +1,6 @@
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.HttpOverrides;
-using System.Web;
-using System.Net;
 using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,7 +43,7 @@ app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) =>
     var form = await request.ReadFormAsync();
     var key = form.ToList().Find(key => key.Key == "api_key");
 
-    if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null || !UserDB.GetUserFromKey(key.Value).isAdmin) // invalid key
+    if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null || !UserDB.GetUserFromKey(key.Value).IsAdmin) // invalid key
     {
         return Results.Unauthorized();
     }
@@ -83,10 +80,10 @@ app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) =>
     User newUser = new User
     {
         Username = NewUsername,
-        isAdmin = false,
+        IsAdmin = false,
         UID = NewUID,
         UploadCount = 0,
-        APIKey = User.newHash(40)
+        APIKey = User.NewHash(40)
     };
 
     UserDB.AddUser(newUser);
@@ -122,7 +119,7 @@ app.MapGet("/api/usr", async Task<IResult> (HttpRequest request) =>
         return Results.Unauthorized();
     }
 
-    if (UserDB.GetUserFromKey(key.Value).isAdmin)
+    if (UserDB.GetUserFromKey(key.Value).IsAdmin)
     {
         return Results.Ok(UserDB.GetDB());
     }
@@ -132,21 +129,19 @@ app.MapGet("/api/usr", async Task<IResult> (HttpRequest request) =>
 
 app.MapGet("/api/stats", async () =>
 {
-    Stats ?stats = new Stats();
-    stats.files = FileDB.GetDB().Count;
-    stats.users = UserDB.GetDB().Count;
+    Stats stats = new Stats();
+    stats.Files = FileDB.GetDB().Count;
+    stats.Users = UserDB.GetDB().Count;
     DirectoryInfo dirInfo = new DirectoryInfo(@"img/");
-    stats.bytes = await Task.Run(() => dirInfo.EnumerateFiles("*", SearchOption.TopDirectoryOnly).Sum(file => file.Length));
-    stats.newest = FileDB.GetDB().Last().Timestamp;
+    stats.Bytes = await Task.Run(() => dirInfo.EnumerateFiles("*", SearchOption.TopDirectoryOnly).Sum(file => file.Length));
+    stats.Newest = FileDB.GetDB().Last().Timestamp;
 
     return Results.Ok(stats);
 });
 
 app.MapPost("/api/upload", async (http) =>
 {
-    http.Features.Get<IHttpMaxRequestBodySizeFeature>().MaxRequestBodySize = null;
-
-    Console.WriteLine(http.Request.Path.ToString()); // Features.Get<IHttpMaxRequestBodySizeFeature>().MaxRequestBodySize = null;
+    http.Features.Get<IHttpMaxRequestBodySizeFeature>().MaxRequestBodySize = null; // removes max filesize (set max in NGINX, not here)
 
     if (!http.Request.HasFormContentType)
     {
@@ -184,13 +179,13 @@ app.MapPost("/api/upload", async (http) =>
 
     newFile.NewImg(UserDB.GetUserFromKey(key.Value).UID, extension);
 
-    using (var stream = System.IO.File.Create("img/" + newFile.filename))
+    using (var stream = System.IO.File.Create("img/" + newFile.Filename))
     {
         await img.CopyToAsync(stream);
     }
 
-    Console.WriteLine($"New File: {newFile.filename}");
-    await http.Response.WriteAsync("https://img.birb.cc/" + newFile.filename);
+    Console.WriteLine($"New File: {newFile.Filename}");
+    await http.Response.WriteAsync("https://img.birb.cc/" + newFile.Filename);
     return;
 });
 
@@ -205,25 +200,24 @@ app.MapDelete("/api/delete/{hash}", async Task<IResult> (HttpRequest request, st
     var key = form.ToList().Find(key => key.Key == "api_key");
 
     if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null) // invalid key
-        {
+    {
         return Results.Unauthorized();
     }
 
-    Img? deleteFile = FileDB.Find(hash);
+    Img deleteFile = FileDB.Find(hash);
 
     if (deleteFile == null)
     {
         return Results.NotFound();
     }
 
-    if (deleteFile.UID == UserDB.GetUserFromKey(key.Value).UID || UserDB.GetUserFromKey(key.Value).isAdmin)
+    if (deleteFile.UID == UserDB.GetUserFromKey(key.Value).UID || UserDB.GetUserFromKey(key.Value).IsAdmin)
     {
         FileDB.Remove(deleteFile);
         return Results.Ok();
     }
 
     return Results.Unauthorized();
-
 });
 
 FileDB.Load();
@@ -233,30 +227,30 @@ app.Run();
 
 public class Stats
 {
-    public long bytes { get; set; }
-    public long users { get; set; }
-    public long files { get; set; }
-    public DateTime newest { get; set; }
+    public long Bytes { get; set; }
+    public long Users { get; set; }
+    public long Files { get; set; }
+    public DateTime Newest { get; set; }
 }
 
 public static class FileDB
 {
-    private static string path = "img.json";
-    private static List<Img>? db = new List<Img>();
+    private readonly static string path = "img.json";
+    private static List<Img> db = new List<Img>();
 
-    public static List<Img>? GetDB()
+    public static List<Img> GetDB()
     {
         return db;
     }
 
     public static Img Find(string hash)
     {
-        return db.Find(file => file.hash == hash);
+        return db.Find(file => file.Hash == hash);
     }
 
     public static void Add(Img file)
     {
-        if (Find(file.hash) is null)
+        if (Find(file.Hash) is null)
         {
             db.Add(file);
             Save();
@@ -274,7 +268,7 @@ public static class FileDB
                 db = JsonConvert.DeserializeObject<List<Img>>(json);
                 Save();
             }
-            Console.WriteLine($"Loaded DB of length {db.Count()}");
+            Console.WriteLine($"Loaded DB of length {db.Count}");
         }
         catch
         {
@@ -284,7 +278,6 @@ public static class FileDB
 
     private static void Save()
     {
-
         try
         {
             using (StreamWriter SW = new StreamWriter(path, false))
@@ -297,7 +290,6 @@ public static class FileDB
         {
             Console.WriteLine($"Error saving {path}!");
         }
-
     }
 
     public static void Remove(Img file)
@@ -305,8 +297,8 @@ public static class FileDB
         db.Remove(file);
         Save();
 
-        File.Delete("img/" + file.filename);
-        Console.WriteLine("Removed file" + file.filename);
+        File.Delete("img/" + file.Filename);
+        Console.WriteLine("Removed file" + file.Filename);
     }
 }
 
@@ -314,16 +306,16 @@ public class Img
 {
     static Random random = new Random();
 
-    public string? hash { get; set; }
-    public string? filename { get; set; }
+    public string? Hash { get; set; }
+    public string? Filename { get; set; }
     public int UID { get; set; }
 
     public DateTime Timestamp { get; set; }
 
     public void NewImg(int uid, string extension)
     {
-        this.hash = newHash(8);
-        this.filename = this.hash + extension;
+        this.Hash = NewHash(8);
+        this.Filename = this.Hash + extension;
         this.UID = uid;
         this.Timestamp = DateTime.Now;
 
@@ -333,21 +325,18 @@ public class Img
         FileDB.Add(this);
     }
 
-    string newHash(int length)
+    static string NewHash(int length)
     {
         string b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         string hash = "";
-        bool used = true;
 
-        while (used)
+        while (FileDB.Find(hash) is not null || string.IsNullOrEmpty(hash))
         {
             hash = String.Empty;
             for (int i = 0; i < length; i++)
             {
                 hash += b64[random.Next(b64.Length)];
             }
-
-            if (FileDB.Find(hash) is null) { used = false; }
         }
 
         return hash;
@@ -358,7 +347,7 @@ public class User
 {
     static Random random = new Random();
 
-    public bool isAdmin { get; set; }
+    public bool IsAdmin { get; set; }
     public string? Username { get; set; }
     public int UID { get; set; }
     public int UploadCount { get; set; } = 0;
@@ -374,21 +363,18 @@ public class User
         };
     }
 
-    public static string newHash(int length)
+    public static string NewHash(int length)
     {
         string b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         string hash = "";
-        bool used = true;
 
-        while (used)
+        while (UserDB.GetUserFromKey(hash) is not null || string.IsNullOrEmpty(hash))
         {
             hash = String.Empty;
             for (int i = 0; i < length; i++)
             {
                 hash += b64[random.Next(b64.Length)];
             }
-
-            if (UserDB.GetUserFromKey(hash) is null) { used = false; }
         }
 
         return hash;
@@ -404,7 +390,7 @@ public class UserDTO
 
 public static class UserDB
 {
-    private static string path = "user.json";
+    private readonly static string path = "user.json";
     private static List<User> db = new List<User>();
 
     public static void Load()
@@ -418,7 +404,7 @@ public static class UserDB
                 db = JsonConvert.DeserializeObject<List<User>>(json);
                 Save();
             }
-            Console.WriteLine($"Loaded DB of length {db.Count()}");
+            Console.WriteLine($"Loaded DB of length {db.Count}");
         }
         catch
         {
@@ -440,7 +426,6 @@ public static class UserDB
         {
             Console.WriteLine($"Error saving {path}!");
         }
-
     }
 
     public static void AddUser(User user)
@@ -454,7 +439,7 @@ public static class UserDB
         return db;
     }
 
-    public static User? GetUserFromUsername(string username)
+    public static User GetUserFromUsername(string username)
     {
         return db.Find(user => user.Username == username);
     }
@@ -469,4 +454,3 @@ public static class UserDB
         return db.Find(user => user.APIKey == key);
     }
 }
-
