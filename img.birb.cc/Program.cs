@@ -2,6 +2,8 @@ using Newtonsoft.Json;
 using Microsoft.AspNetCore.HttpOverrides;
 using System.Web;
 using System.Net;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +18,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 
 app.UseHttpsRedirection();
 
-app.MapGet("/api/img/", async Task<IResult> (HttpRequest request) =>
+app.MapGet("/api/img", async Task<IResult> (HttpRequest request) =>
 {
     if (!request.HasFormContentType)
     {
@@ -53,23 +55,26 @@ app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) =>
     var UID = form.ToList().Find(UID => UID.Key == "UID");
 
     string NewUsername;
-    int NewUID;
+    int NewUID = 0;
 
-    if ( string.IsNullOrEmpty(username.Value) || UserDB.GetUserFromUsername(username.Value) is not null )
+    if (string.IsNullOrEmpty(username.Value) || UserDB.GetUserFromUsername(username.Value) is not null)
     {
         return Results.BadRequest("Invalid Username");
     }
 
     NewUsername = username.Value;
-    
-    if ( string.IsNullOrEmpty(UID.Value) || UID.Key is null)
+
+    if (string.IsNullOrEmpty(UID.Value) || UID.Key is null)
     {
-        NewUID = UserDB.GetDB().Count + 1;
+        while (UserDB.GetUserFromUID(NewUID) is not null)
+        {
+            NewUID += 1;
+        }
     }
     else
     {
         NewUID = int.Parse(UID.Value);
-        if (UserDB.GetUserFromUID(int.Parse(UID.Value)) is not null)
+        if (UserDB.GetUserFromUID(NewUID) is not null)
         {
             return Results.BadRequest("UID Taken");
         }
@@ -100,10 +105,9 @@ app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) =>
     SXCU += "}";
 
     return Results.Text(SXCU);
-
 });
 
-app.MapGet("/api/usr/", async Task<IResult> (HttpRequest request) =>
+app.MapGet("/api/usr", async Task<IResult> (HttpRequest request) =>
 {
     if (!request.HasFormContentType)
     {
@@ -128,7 +132,7 @@ app.MapGet("/api/usr/", async Task<IResult> (HttpRequest request) =>
 
 app.MapGet("/api/stats", async () =>
 {
-    Stats stats = new Stats();
+    Stats ?stats = new Stats();
     stats.files = FileDB.GetDB().Count;
     stats.users = UserDB.GetDB().Count;
     DirectoryInfo dirInfo = new DirectoryInfo(@"img/");
@@ -138,48 +142,57 @@ app.MapGet("/api/stats", async () =>
     return Results.Ok(stats);
 });
 
-app.MapPost("/api/upload", async Task<IResult> (HttpRequest request) =>
+app.MapPost("/api/upload", async (http) =>
+{
+    http.Features.Get<IHttpMaxRequestBodySizeFeature>().MaxRequestBodySize = null;
+
+    Console.WriteLine(http.Request.Path.ToString()); // Features.Get<IHttpMaxRequestBodySizeFeature>().MaxRequestBodySize = null;
+
+    if (!http.Request.HasFormContentType)
     {
-        if (!request.HasFormContentType)
-        {
-            return Results.BadRequest();
-        }
+        http.Response.StatusCode = 400;
+        return;
+    }
 
-        var form = await request.ReadFormAsync();
-        var key = form.ToList().Find(key => key.Key == "api_key");
+    var form = await http.Request.ReadFormAsync();
+    var key = form.ToList().Find(key => key.Key == "api_key");
 
-        if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null) // invalid key
-        {
-            return Results.Unauthorized();
-        }
+    if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null) // invalid key
+    {
+        http.Response.StatusCode = 401;
+        return;
+    }
 
-        var img = form.Files["img"];
+    var img = form.Files["img"];
 
-        if (img is null || img.Length == 0) // no file or no exention
-        {
-            Console.WriteLine("Invalid upload");
-            return Results.BadRequest();
-        }
+    if (img is null || img.Length == 0) // no file or no exention
+    {
+        Console.WriteLine("Invalid upload");
+        http.Response.StatusCode = 400;
+        return;
+    }
 
-        string extension = Path.GetExtension(img.FileName);
+    string extension = Path.GetExtension(img.FileName);
 
-        if (extension is null || extension.Length == 0 || !fileTypes.Contains(extension)) // invalid extension
-        {
-            return Results.BadRequest("Invalid filetype or extension");
-        }
+    if (extension is null || extension.Length == 0 || !fileTypes.Contains(extension)) // invalid extension
+    {
+        http.Response.StatusCode = 400;
+        return;
+    }
 
-        Img newFile = new Img();
+    Img newFile = new Img();
 
-        newFile.NewImg(UserDB.GetUserFromKey(key.Value).UID, extension);
+    newFile.NewImg(UserDB.GetUserFromKey(key.Value).UID, extension);
 
-        using (var stream = System.IO.File.Create("img/" + newFile.filename))
-        {
-            await img.CopyToAsync(stream);
-        }
+    using (var stream = System.IO.File.Create("img/" + newFile.filename))
+    {
+        await img.CopyToAsync(stream);
+    }
 
-        Console.WriteLine($"New File: {newFile.filename}");
-        return Results.Text("https://img.birb.cc/" + newFile.filename);
-    });
+    Console.WriteLine($"New File: {newFile.filename}");
+    await http.Response.WriteAsync("https://img.birb.cc/" + newFile.filename);
+    return;
+});
 
 app.MapDelete("/api/delete/{hash}", async Task<IResult> (HttpRequest request, string hash) =>
 {
@@ -192,11 +205,11 @@ app.MapDelete("/api/delete/{hash}", async Task<IResult> (HttpRequest request, st
     var key = form.ToList().Find(key => key.Key == "api_key");
 
     if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null) // invalid key
-    {
+        {
         return Results.Unauthorized();
     }
 
-    Img ?deleteFile = FileDB.Find(hash);
+    Img? deleteFile = FileDB.Find(hash);
 
     if (deleteFile == null)
     {
@@ -210,7 +223,7 @@ app.MapDelete("/api/delete/{hash}", async Task<IResult> (HttpRequest request, st
     }
 
     return Results.Unauthorized();
- 
+
 });
 
 FileDB.Load();
@@ -236,7 +249,7 @@ public static class FileDB
         return db;
     }
 
-    public static Img? Find(string hash)
+    public static Img Find(string hash)
     {
         return db.Find(file => file.hash == hash);
     }
@@ -456,3 +469,4 @@ public static class UserDB
         return db.Find(user => user.APIKey == key);
     }
 }
+
