@@ -396,7 +396,7 @@ public class User
     public int UID { get; set; }
     public int UploadCount { get; set; } = 0;
     public string? APIKey { get; set; }
-    public string? Domain { get; set; }
+    public string? Domain { get; set; } = "img.birb.cc";
     public bool ShowURL { get; set; }
 
     public UserDTO UserToDTO()
