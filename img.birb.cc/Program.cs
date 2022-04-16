@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Http.Features;
 
@@ -83,7 +83,9 @@ app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) =>
         IsAdmin = false,
         UID = NewUID,
         UploadCount = 0,
-        APIKey = User.NewHash(40)
+        APIKey = User.NewHash(40),
+        ShowURL = true,
+        Domain = "img.birb.cc"
     };
 
     UserDB.AddUser(newUser);
@@ -102,6 +104,46 @@ app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) =>
     SXCU += "}";
 
     return Results.Text(SXCU);
+});
+
+app.MapPost("/api/usr/domain", async Task<IResult> (HttpRequest request) =>
+{
+    if (!request.HasFormContentType)
+    {
+        return Results.BadRequest();
+    }
+
+    var form = await request.ReadFormAsync();
+    var key = form.ToList().Find(key => key.Key == "api_key");
+
+    if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null) // invalid key
+    {
+        return Results.Unauthorized();
+    }
+
+    var domain = form.ToList().Find(newDomain => newDomain.Key == "domain");
+
+    string NewDomain;
+
+    if (string.IsNullOrEmpty(domain.Value) || domain.Value != "img.birb.cc" && !domain.Value.ToString().EndsWith("clapped.me") && !domain.Value.ToString().EndsWith("counterstrike.trade"))
+    {
+        return Results.BadRequest("Invalid Domain");
+    }
+
+    var showURL = form.ToList().Find(showURL => showURL.Key == "showURL");
+
+    if (!string.IsNullOrEmpty(showURL.Value) && showURL.Value == "true" || showURL.Value == "false")
+    {
+        UserDB.GetUserFromKey(key.Value).ShowURL = System.Convert.ToBoolean(showURL.Value);
+    }
+
+    NewDomain = domain.Value;
+
+    UserDB.GetUserFromKey(key.Value).Domain = NewDomain;
+
+    UserDB.Save();
+
+    return Results.Accepted();
 });
 
 app.MapGet("/api/usr", async Task<IResult> (HttpRequest request) =>
@@ -142,6 +184,7 @@ app.MapGet("/api/stats", async () =>
 app.MapPost("/api/upload", async (http) =>
 {
     http.Features.Get<IHttpMaxRequestBodySizeFeature>().MaxRequestBodySize = null; // removes max filesize (set max in NGINX, not here)
+    
 
     if (!http.Request.HasFormContentType)
     {
@@ -176,8 +219,9 @@ app.MapPost("/api/upload", async (http) =>
     }
 
     Img newFile = new Img();
+    User user = UserDB.GetUserFromKey(key.Value);
 
-    newFile.NewImg(UserDB.GetUserFromKey(key.Value).UID, extension);
+    newFile.NewImg(user.UID, extension);
 
     using (var stream = System.IO.File.Create("img/" + newFile.Filename))
     {
@@ -185,7 +229,7 @@ app.MapPost("/api/upload", async (http) =>
     }
 
     Console.WriteLine($"New File: {newFile.Filename}");
-    await http.Response.WriteAsync("https://img.birb.cc/" + newFile.Filename);
+    await http.Response.WriteAsync($"{(user.ShowURL ? "​" : "")} https://{user.Domain}/" + newFile.Filename); // First "" contains zero-width space
     return;
 });
 
@@ -352,6 +396,8 @@ public class User
     public int UID { get; set; }
     public int UploadCount { get; set; } = 0;
     public string? APIKey { get; set; }
+    public string? Domain { get; set; }
+    public bool ShowURL { get; set; }
 
     public UserDTO UserToDTO()
     {
