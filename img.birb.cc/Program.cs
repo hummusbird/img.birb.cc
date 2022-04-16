@@ -48,8 +48,8 @@ app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) =>
         return Results.Unauthorized();
     }
 
-    var username = form.ToList().Find(username => username.Key == "Username");
-    var UID = form.ToList().Find(UID => UID.Key == "UID");
+    var username = form.ToList().Find(username => username.Key.ToLower() == "username");
+    var UID = form.ToList().Find(UID => UID.Key.ToLower() == "uid");
 
     string NewUsername;
     int NewUID = 0;
