@@ -229,7 +229,7 @@ app.MapPost("/api/upload", async (http) =>
     }
 
     Console.WriteLine($"New File: {newFile.Filename}");
-    await http.Response.WriteAsync($"{(user.ShowURL ? "​" : "")} https://{user.Domain}/" + newFile.Filename); // First "" contains zero-width space
+    await http.Response.WriteAsync($"{(user.ShowURL ? "​" : "")}https://{user.Domain}/" + newFile.Filename); // First "" contains zero-width space
     return;
 });
 
