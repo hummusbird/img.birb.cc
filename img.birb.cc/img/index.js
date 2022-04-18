@@ -16,7 +16,7 @@ function changeToSize(x) {
     if (x < 1024){
         return (numberWithCommas(x) + " bytes")
     }
-    if (x >= 1000 && x < 1048576) {
+    if (x >= 1024 && x < 1048576) {
         return (numberWithCommas(Math.round(x/1024)) + " kilobytes")
     }
     if (x >= 1048576 && x < 1073741824) {
