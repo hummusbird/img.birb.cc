@@ -2,29 +2,15 @@
 
 C# image host.
 
-no, you cannot get an API key.
+no, you cannot have an API key.
 
 ## how to host yourself
 
-- fork the repo. 
-- modify Program.cs and change line 181 to your domain.
+- clone the repo OR download the published build. 
 - install NGINX and dotnet.
 - use this config in nginx
+
 ```
-server {
-        listen          443 ssl http2;
-        listen          [::]:443 ssl http2;
-        server_name     YOURDOMAIN;
-        ssl             on;
-        ssl_certificate /etc/ssl/certs/YOURCERT;
-        ssl_certificate_key     /etc/ssl/private/YOURKEY;
-
-        add_header X-Frame-Options DENY;
-        add_header X-Content-Type-Options nosniff;
-
-        root **POINT TO IMG FOLDER**;
-        index index.html;
-
         location / {
                 try_files $uri $uri/ =404;
         }
@@ -45,6 +31,25 @@ server {
 }
 ```
 
-- change server_name, root and cert lines to your domain.
-- build the release using dotnet, then run the dll
-- modify user.json and create urself an admin user
+- run the .dll
+- a default admin api key will be generated. Use this to add new accounts.
+
+## valid endpoints
+
+```
+
+POST /api/upload
+
+POST /api/usr                   // admin only
+
+POST /api/usr/domain
+
+GET /api/usr
+
+GET /api/stats
+
+GET /api/img                    // admin only
+
+DELETE /api/delete/{hash}
+
+```

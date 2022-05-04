@@ -125,11 +125,6 @@ app.MapPost("/api/usr/domain", async Task<IResult> (HttpRequest request) =>
 
     string NewDomain;
 
-    if (string.IsNullOrEmpty(domain.Value) || domain.Value != "img.birb.cc" && !domain.Value.ToString().EndsWith("clapped.me") && !domain.Value.ToString().EndsWith("counterstrike.trade"))
-    {
-        return Results.BadRequest("Invalid Domain");
-    }
-
     var showURL = form.ToList().Find(showURL => showURL.Key == "showURL");
 
     if (!string.IsNullOrEmpty(showURL.Value) && showURL.Value == "true" || showURL.Value == "false")
@@ -184,7 +179,7 @@ app.MapGet("/api/stats", async () =>
 app.MapPost("/api/upload", async (http) =>
 {
     http.Features.Get<IHttpMaxRequestBodySizeFeature>().MaxRequestBodySize = null; // removes max filesize (set max in NGINX, not here)
-    
+
 
     if (!http.Request.HasFormContentType)
     {
@@ -212,7 +207,7 @@ app.MapPost("/api/upload", async (http) =>
 
     string extension = Path.GetExtension(img.FileName);
 
-    if (extension is null || extension.Length == 0 || !fileTypes.Contains(extension)) // invalid extension
+    if (extension is null || extension.Length == 0 || !fileTypes.Contains(extension) && !UserDB.GetUserFromKey(key.Value).IsAdmin) // invalid extension
     {
         http.Response.StatusCode = 400;
         return;
@@ -317,6 +312,11 @@ public static class FileDB
         catch
         {
             Console.WriteLine($"Unable to load {path}");
+        }
+
+        if (!File.Exists(path))
+        {
+            Save();
         }
     }
 
@@ -455,6 +455,23 @@ public static class UserDB
         catch
         {
             Console.WriteLine($"Unable to load {path}");
+        }
+
+        if (!File.Exists(path) || db.Count == 0)
+        {
+            Console.WriteLine("Generated default Admin account");
+            User newUser = new User
+            {
+                Username = "Admin",
+                IsAdmin = true,
+                UID = 0,
+                UploadCount = 0,
+                APIKey = User.NewHash(40),
+                ShowURL = true,
+                Domain = "img.birb.cc"
+            };
+            Console.WriteLine("API-KEY: " + newUser.APIKey + " \nKeep this safe");
+            UserDB.AddUser(newUser);
         }
     }
 
