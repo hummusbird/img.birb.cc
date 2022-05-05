@@ -216,7 +216,7 @@ app.MapPost("/api/upload", async (http) =>
     Img newFile = new Img();
     User user = UserDB.GetUserFromKey(key.Value);
 
-    newFile.NewImg(user.UID, extension);
+    newFile.NewImg(user.UID, extension, img);
 
     using (var stream = System.IO.File.Create("img/" + newFile.Filename))
     {
@@ -257,6 +257,26 @@ app.MapDelete("/api/delete/{hash}", async Task<IResult> (HttpRequest request, st
     }
 
     return Results.Unauthorized();
+});
+
+app.MapDelete("/api/nuke", async Task<IResult> (HttpRequest request) =>
+{
+    if (!request.HasFormContentType )
+    {
+        return Results.BadRequest();
+    }
+
+    var form = await request.ReadFormAsync();
+    var key = form.ToList().Find(key => key.Key == "api_key");
+
+    if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null) // invalid key
+    {
+        return Results.Unauthorized();
+    }
+
+    FileDB.Nuke(UserDB.GetUserFromKey(key.Value));
+
+    return Results.Ok();
 });
 
 FileDB.Load();
@@ -344,6 +364,19 @@ public static class FileDB
         File.Delete("img/" + file.Filename);
         Console.WriteLine("Removed file" + file.Filename);
     }
+
+    public static void Nuke(User user)
+    {
+        List<Img> temp = new List<Img>(db);
+
+        foreach (Img img in temp)
+        {
+            if (img.UID == user.UID)
+            {
+                Remove(img);
+            }
+        }
+    }
 }
 
 public class Img
@@ -356,7 +389,7 @@ public class Img
 
     public DateTime Timestamp { get; set; }
 
-    public void NewImg(int uid, string extension)
+    public void NewImg(int uid, string extension, IFormFile img)
     {
         this.Hash = NewHash(8);
         this.Filename = this.Hash + extension;
@@ -364,6 +397,7 @@ public class Img
         this.Timestamp = DateTime.Now;
 
         UserDB.GetUserFromUID(uid).UploadCount++;
+        UserDB.GetUserFromUID(uid).UploadedBytes += img.Length;
         UserDB.Save();
 
         FileDB.Add(this);
@@ -395,6 +429,7 @@ public class User
     public string? Username { get; set; }
     public int UID { get; set; }
     public int UploadCount { get; set; } = 0;
+    public long UploadedBytes { get; set; } = 0;
     public string? APIKey { get; set; }
     public string? Domain { get; set; } = "img.birb.cc";
     public bool ShowURL { get; set; }
@@ -405,6 +440,7 @@ public class User
         {
             Username = this.Username,
             UID = this.UID,
+            UploadedBytes = this.UploadedBytes,
             UploadCount = this.UploadCount
         };
     }
@@ -431,6 +467,7 @@ public class UserDTO
 {
     public string? Username { get; set; }
     public int UID { get; set; }
+    public long UploadedBytes { get; set; } = 0;
     public int UploadCount { get; set; } = 0;
 }
 

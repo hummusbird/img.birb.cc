@@ -37,7 +37,6 @@ no, you cannot have an API key.
 ## valid endpoints
 
 ```
-
 POST /api/upload
 
 POST /api/usr                   // admin only
@@ -52,4 +51,5 @@ GET /api/img                    // admin only
 
 DELETE /api/delete/{hash}
 
+DELETE /api/nuke
 ```
