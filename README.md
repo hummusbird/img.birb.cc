@@ -39,15 +39,17 @@ no, you cannot have an API key.
 ```
 POST /api/upload
 
-POST /api/usr                   // admin only
+POST /api/usr/new                  // admin only
 
 POST /api/usr/domain
 
-GET /api/usr
+POST /api/usr
+
+POST /api/users
 
 GET /api/stats
 
-GET /api/img                    // admin only
+POST /api/img
 
 DELETE /api/delete/{hash}
 
