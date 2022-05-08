@@ -23,7 +23,7 @@
     </style>
 </head>
 <body>
-    <h1>welcome to img.birb.cc</h1>
+    <h1 id="title">welcome to img.birb.cc</h1>
 
     <h2>faq:</h2>
     <p id=q>- can i get an api key?</p>
@@ -42,6 +42,7 @@
         <p id=gb>-- mb used</p>
         <p id=time></p>
         <script>
+            setTitle();
             stats();
             setInterval(stats, 60000)
         </script>
