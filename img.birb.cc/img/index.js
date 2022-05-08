@@ -12,6 +12,10 @@ function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
+function setTitle() {
+    document.getElementById("title").innerHTML = "welcome to " + (window.location.host || "img.birb.cc")
+}
+
 function changeToSize(x) {
     if (x < 1024){
         return (numberWithCommas(x) + " bytes")

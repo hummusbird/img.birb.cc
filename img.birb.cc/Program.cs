@@ -2,11 +2,22 @@
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Http.Features;
 
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+        policy =>
+        {
+            policy.WithOrigins("*").AllowAnyHeader().AllowAnyMethod(); ;
+        });
+});
 
 var app = builder.Build();
 
-string[] fileTypes = { ".jpg", ".jpeg", ".png", ".gif", ".mp4" };
+string[] fileTypes = { ".jpg", ".jpeg", ".png", ".gif", ".mp4", ".mp3", ".wav" };
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
@@ -15,7 +26,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 
 app.UseHttpsRedirection();
 
-app.MapGet("/api/img", async Task<IResult> (HttpRequest request) =>
+app.MapPost("/api/img", async Task<IResult> (HttpRequest request) =>
 {
     if (!request.HasFormContentType)
     {
@@ -30,10 +41,28 @@ app.MapGet("/api/img", async Task<IResult> (HttpRequest request) =>
         return Results.Unauthorized();
     }
 
-    return Results.Ok(FileDB.GetDB());
+    else if (UserDB.GetUserFromKey(key.Value).IsAdmin) 
+    {
+        return Results.Ok(FileDB.GetDB());
+    }
+
+    else
+    {
+        List<Img> temp = new List<Img>();
+
+        foreach (var img in FileDB.GetDB())
+        {
+            if (img.UID == UserDB.GetUserFromKey(key.Value).UID)
+            {
+                temp.Add(img);
+            }
+        }
+
+        return Results.Ok(temp);
+    }
 });
 
-app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) =>
+app.MapPost("/api/usr/new", async Task<IResult> (HttpRequest request) =>
 {
     if (!request.HasFormContentType)
     {
@@ -91,8 +120,8 @@ app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) =>
     UserDB.AddUser(newUser);
 
     string SXCU = "{\n";
-    SXCU += "\"Version\": \"13.7.0\",'\n";
-    SXCU += "\"Name\": \"birb.cc\",";
+    SXCU += "\"Version\": \"13.7.0\",\n";
+    SXCU += "\"Name\": \"birb.cc\",\n";
     SXCU += "\"DestinationType\": \"ImageUploader\",\n";
     SXCU += "\"RequestMethod\": \"POST\",\n";
     SXCU += "\"RequestURL\": \"https://img.birb.cc/api/upload\",\n";
@@ -141,7 +170,7 @@ app.MapPost("/api/usr/domain", async Task<IResult> (HttpRequest request) =>
     return Results.Accepted();
 });
 
-app.MapGet("/api/usr", async Task<IResult> (HttpRequest request) =>
+app.MapPost("/api/users", async Task<IResult> (HttpRequest request) =>
 {
     if (!request.HasFormContentType)
     {
@@ -162,6 +191,24 @@ app.MapGet("/api/usr", async Task<IResult> (HttpRequest request) =>
     }
 
     return Results.Ok(UserDB.GetDB().Select(x => x.UserToDTO()).ToList());
+});
+
+app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) =>
+{
+    if (!request.HasFormContentType)
+    {
+        return Results.BadRequest();
+    }
+
+    var form = await request.ReadFormAsync();
+    var key = form.ToList().Find(key => key.Key == "api_key");
+
+    if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null) // invalid key
+    {
+        return Results.Unauthorized();
+    }
+
+    return Results.Ok(UserDB.GetDB().Find(uid => uid.UID == UserDB.GetUserFromKey(key.Value).UID));
 });
 
 app.MapGet("/api/stats", async () =>
@@ -275,12 +322,14 @@ app.MapDelete("/api/nuke", async Task<IResult> (HttpRequest request) =>
     }
 
     FileDB.Nuke(UserDB.GetUserFromKey(key.Value));
-
+ 
     return Results.Ok();
 });
 
 FileDB.Load();
 UserDB.Load();
+
+app.UseCors(MyAllowSpecificOrigins);
 
 app.Run();
 
@@ -508,7 +557,7 @@ public static class UserDB
                 Domain = "img.birb.cc"
             };
             Console.WriteLine("API-KEY: " + newUser.APIKey + " \nKeep this safe");
-            UserDB.AddUser(newUser);
+            AddUser(newUser);
         }
     }
 
