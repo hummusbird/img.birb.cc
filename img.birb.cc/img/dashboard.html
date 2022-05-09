@@ -62,7 +62,7 @@
             background-color: #1F1F1F;
             border: none;
             height: 29px;
-            width: 300px;
+            width: 200px;
             font-family: "Consolas", "Lucida Console", monospace;
             font-size: large;
             color: #ffffff;
@@ -93,6 +93,7 @@
             align-content: center;
             align-self: center;
             padding-top: 50px;
+            padding-bottom:50px;
         }
 
         #images img {
@@ -178,6 +179,45 @@
         #delete:hover {
             cursor: pointer;
         }
+
+        #submit {
+            background-color: #1F1F1F;
+            border: none;
+            height: 31px;
+            font-family: "Consolas", "Lucida Console", monospace;
+            font-size: large;
+            color: #ffffff;
+        }
+
+        #showURL {
+            height:20px;
+            width:20px;
+            margin-top:2px;
+            filter: invert(100%) hue-rotate(207deg) brightness(1.7);
+        }
+
+        #submit:hover {
+            cursor:pointer;
+        }
+
+        #nuke {
+            display:none;
+            background-color: #ff0000;
+            color: #1F1F1F;
+            font-family: "Consolas", "Lucida Console", monospace;
+            font-size: large;
+            position:absolute;
+            right: 0;
+            left: 0;
+            margin: auto;
+            height: 40px;
+            width: 100px;
+            font-weight: 900;
+        }
+
+        footer {
+            height:100px
+        }
     </style>
 </head>
 
@@ -198,20 +238,9 @@
         </div>
         <div id="info">
             <h2>info:</h2>
-            <p>username: <span id=username>--</span></p>
             <p>uid: <span id=uid>--</span></p>
-            <p>current domain: <select id=domain>
-                <option value="img.birb.cc">img.birb.cc</option>
-                <option value="clapped.me">clapped.me</option>
-                <option value="counterstrike.trade">counterstrike.trade</option>
-                <option value="isnt-fucking.gay">isnt-fucking.gay</option>
-                <option value="catgirls.wtf">catgirls.wtf</option>
-                <option value="catgirls.win">catgirls.win</option>
-                <option value="catgirl.design">catgirl.design</option>
-                <option value="catgirls.life">catgirls.life</option>
-                <option value="esex.tech">esex.tech</option>
-                <option value="infants.trade">infants.trade</option>
-            </select></p>
+            <p>showURL: <input id="showURL" type="checkbox"></p>
+            <p>current domain: <input id=domain value="img.birb.cc"> <button id="submit" onclick="submitDomain();">submit</button></p>
         </div>
     </div>
 
@@ -227,8 +256,12 @@
             <button id="delete" onclick="delimg();">delete</button>
             <button id="copyurl" onclick="copyToClipboard();">copy URL</button>
         </div>
-
-
     </div>
 
+
+    <button id="nuke" onclick="nuke()">nuke</button>
 </body>
+
+<footer>
+
+</footer>

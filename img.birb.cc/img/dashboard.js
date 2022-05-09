@@ -6,7 +6,7 @@ async function login() {
     let usrout;
     let imgout;
 
-    fetch("https://localhost:7247/api/usr",
+    fetch("https://clapped.me/api/usr",
         {
             body: formData,
             method: "post"
@@ -14,40 +14,73 @@ async function login() {
         .then(
             data => {
                 usrout = data
+                console.log(data)
                 document.getElementById("loginstat").innerHTML = "api key:"
                 document.getElementById("loginarea").style.display = "none"
                 document.getElementById("stats").style.display = "initial"
+                document.getElementById("nuke").style.display = "initial"
                 document.getElementById("wide").style.display = "flex"
 
-                document.getElementById("username").innerHTML = usrout["username"]
+
+                document.getElementById("dashboard").innerHTML = "dashboard - "+ usrout["username"]
                 document.getElementById("uid").innerHTML = usrout["uid"]
+                document.getElementById("showURL").checked = usrout["showURL"]
                 document.getElementById("domain").value = usrout["domain"]
             })
         .catch(e => document.getElementById("loginstat").innerHTML = "invalid key")
 
-    fetch("https://localhost:7247/api/img",
+    fetch("https://clapped.me/api/img",
         {
             body: formData,
             method: "post"
         }).then(res => res.json())
         .then(
             data => {
-                console.log(data)
+                
                 imgout = data
 
                 document.getElementById("files").innerHTML = usrout["uploadCount"] + " files uploaded"
                 document.getElementById("gb").innerHTML = bytes(usrout["uploadedBytes"]) + " used"
                 document.getElementById("time").innerHTML = changeToTime(Math.round((new Date().getTime() - Date.parse(data[data.length - 1]["timestamp"])) / 1000 / 60)) + " since last upload"
 
-                for (var i = 0; i < data.length; i++) {
-                    var item = document.createElement("img");
-                    item.src = `https://${usrout["domain"]}/` + data[i]["filename"]
-                    item.setAttribute("onclick", `display("${data[i]["filename"]}","${usrout["domain"]}");`)
-                    document.getElementById("images").appendChild(item)
+                for (var i = data.length - 1; i > 0; i--) {
+                    if (data[i]["uid"] == usrout["uid"]){
+                        var item = document.createElement("img");
+                        item.src = `https://${usrout["domain"]}/` + data[i]["filename"]
+                        item.setAttribute("onclick", `display("${data[i]["filename"]}","${usrout["domain"]}");`)
+                        document.getElementById("images").appendChild(item)
+                    }
                 }
             })
         .catch(e => document.getElementById("dashboard").innerHTML = "dashboard")
 
+}
+
+function submitDomain() {
+
+    let formData = new FormData();
+    formData.append("api_key", document.getElementById("keybox").value)
+    formData.append("domain", document.getElementById("domain").value)
+    formData.append("showURL", document.getElementById("showURL").checked)
+
+    console.log(formData)
+
+    fetch(`https://clapped.me/api/usr/domain`,
+        {
+            body: formData,
+            method: "POST"
+        }).then(res => res.json())
+        .then(
+            data => {
+
+            })
+        .catch(e => document.getElementById("loginstat").innerHTML = "invalid key")
+
+    document.getElementById("images").innerHTML = null
+
+    login()
+
+    
 }
 
 function copyToClipboard(text) {
@@ -62,7 +95,7 @@ function delimg(hash) {
     let formData = new FormData();
     formData.append("api_key", document.getElementById("keybox").value)
 
-    fetch(`https://localhost:7247/api/delete/${hash}`,
+    fetch(`https://clapped.me/api/delete/${hash}`,
         {
             body: formData,
             method: "DELETE"
@@ -79,10 +112,12 @@ function delimg(hash) {
 }
 
 function closePreview() {
+    document.getElementById("nuke").style.display = "initial"
     document.getElementById("preview").style.display = "none"
 }
 
 function display(filename, domain) {
+    document.getElementById("nuke").style.display = "none"
     document.getElementById("preview").style.display = "initial"
     document.getElementById("copyurl").innerHTML = "copy URL"
     document.getElementById("copyurl").setAttribute("onclick", "copyToClipboard(" + `"https://${domain}/${filename}")`)
