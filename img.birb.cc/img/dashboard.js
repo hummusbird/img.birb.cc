@@ -21,7 +21,7 @@ async function login() {
 
                 document.getElementById("username").innerHTML = usrout["username"]
                 document.getElementById("uid").innerHTML = usrout["uid"]
-                document.getElementById("domain").innerHTML = usrout["domain"]
+                document.getElementById("domain").value = usrout["domain"]
             })
         .catch(e => document.getElementById("loginstat").innerHTML = "invalid key")
 
@@ -38,16 +38,56 @@ async function login() {
                 document.getElementById("files").innerHTML = usrout["uploadCount"] + " files uploaded"
                 document.getElementById("gb").innerHTML = bytes(usrout["uploadedBytes"]) + " used"
                 document.getElementById("time").innerHTML = changeToTime(Math.round((new Date().getTime() - Date.parse(data[data.length - 1]["timestamp"])) / 1000 / 60)) + " since last upload"
-            
-                data.foreach(img => {
-                    console.log(img["hash"])
+
+                for (var i = 0; i < data.length; i++) {
                     var item = document.createElement("img");
-                    item.src = img["hash"]
+                    item.src = `https://${usrout["domain"]}/` + data[i]["filename"]
+                    item.setAttribute("onclick", `display("${data[i]["filename"]}","${usrout["domain"]}");`)
                     document.getElementById("images").appendChild(item)
-                })
+                }
             })
         .catch(e => document.getElementById("dashboard").innerHTML = "dashboard")
 
+}
+
+function copyToClipboard(text) {
+
+    navigator.clipboard.writeText(text);
+
+    document.getElementById("copyurl").innerHTML = "copied!"
+}
+
+function delimg(hash) {
+
+    let formData = new FormData();
+    formData.append("api_key", document.getElementById("keybox").value)
+
+    fetch(`https://localhost:7247/api/delete/${hash}`,
+        {
+            body: formData,
+            method: "DELETE"
+        }).then(res => res.json())
+        .then(
+            data => {
+
+            })
+        .catch(e => document.getElementById("loginstat").innerHTML = "invalid key")
+
+    document.getElementById("images").innerHTML = null
+
+    login()
+}
+
+function closePreview() {
+    document.getElementById("preview").style.display = "none"
+}
+
+function display(filename, domain) {
+    document.getElementById("preview").style.display = "initial"
+    document.getElementById("copyurl").innerHTML = "copy URL"
+    document.getElementById("copyurl").setAttribute("onclick", "copyToClipboard(" + `"https://${domain}/${filename}")`)
+    document.getElementById("preview_img").src = `https://${domain}/` + filename
+    document.getElementById("delete").setAttribute("onclick", `delimg("${filename.substr(0, 8)}");`)
 }
 
 function bytes(x) {

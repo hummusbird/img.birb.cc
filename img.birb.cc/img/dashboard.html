@@ -58,7 +58,17 @@
             padding-right: 15px;
         }
 
-        #wide{
+        #domain {
+            background-color: #1F1F1F;
+            border: none;
+            height: 29px;
+            width: 300px;
+            font-family: "Consolas", "Lucida Console", monospace;
+            font-size: large;
+            color: #ffffff;
+        }
+
+        #wide {
             display: none;
             flex-direction: row;
         }
@@ -81,6 +91,7 @@
             grid-template-columns: repeat(auto-fit, 200px);
             gap: 50px;
             align-content: center;
+            align-self: center;
             padding-top: 50px;
         }
 
@@ -88,8 +99,85 @@
             width: 200px;
             height: 200px;
             object-fit: cover;
+            transition: 0.15s
         }
 
+        #images img:hover {
+            transform: scale(1.15);
+            cursor: pointer;
+        }
+
+        #preview {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #00000078;
+            height: 100vh;
+            width: 100vw;
+            backdrop-filter: blur(5px);
+        }
+
+        #preview img {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            margin: auto;
+            max-width: 90vw;
+            max-height: 90vh;
+        }
+
+        #closePreview {
+            background-color: #131313;
+            font-size: x-large;
+            font-family: "Consolas", "Lucida Console", monospace;
+            width: 60px;
+            height: 60px;
+            margin: 20px;
+            border: none;
+            color: white;
+        }
+
+        #closePreview:hover {
+            cursor: pointer;
+        }
+
+        #buttons button {
+            font-family: "Consolas", "Lucida Console", monospace;
+            background-color: #131313;
+            border: none;
+            padding: 10px;
+            width: 120px;
+            height: 50px;
+            font-size: large;
+        }
+
+        #buttons {
+            position: absolute;
+            bottom: 30px;
+            right: 0;
+            left: 0;
+            margin: auto;
+            width: fit-content
+        }
+
+        #copyurl {
+            color: white;
+        }
+
+        #copyurl:hover {
+            cursor: pointer
+        }
+
+        #delete {
+            color: #ff0000;
+        }
+
+        #delete:hover {
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -110,13 +198,36 @@
         </div>
         <div id="info">
             <h2>info:</h2>
-            <p>username: <span id = username>--</span></p>
-            <p>uid: <span id = uid>--</span></p>
-            <p>current domain: <span id = domain>--</span></p>
+            <p>username: <span id=username>--</span></p>
+            <p>uid: <span id=uid>--</span></p>
+            <p>current domain: <select id=domain>
+                <option value="img.birb.cc">img.birb.cc</option>
+                <option value="clapped.me">clapped.me</option>
+                <option value="counterstrike.trade">counterstrike.trade</option>
+                <option value="isnt-fucking.gay">isnt-fucking.gay</option>
+                <option value="catgirls.wtf">catgirls.wtf</option>
+                <option value="catgirls.win">catgirls.win</option>
+                <option value="catgirl.design">catgirl.design</option>
+                <option value="catgirls.life">catgirls.life</option>
+                <option value="esex.tech">esex.tech</option>
+                <option value="infants.trade">infants.trade</option>
+            </select></p>
         </div>
     </div>
-    
+
     <div id=images>
+
+    </div>
+
+    <div id=preview onclick="">
+        <button id=closePreview onclick="closePreview();">X</button>
+        <img id="preview_img" src="">
+
+        <div id="buttons">
+            <button id="delete" onclick="delimg();">delete</button>
+            <button id="copyurl" onclick="copyToClipboard();">copy URL</button>
+        </div>
+
 
     </div>
 
