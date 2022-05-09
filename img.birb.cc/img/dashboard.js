@@ -6,7 +6,7 @@ async function login() {
     let usrout;
     let imgout;
 
-    fetch("https://clapped.me/api/usr",
+    fetch(`https://${window.location.host}/api/usr`,
         {
             body: formData,
             method: "post"
@@ -29,7 +29,7 @@ async function login() {
             })
         .catch(e => document.getElementById("loginstat").innerHTML = "invalid key")
 
-    fetch("https://clapped.me/api/img",
+    fetch(`https://${window.location.host}/api/img`,
         {
             body: formData,
             method: "post"
@@ -65,7 +65,7 @@ function submitDomain() {
 
     console.log(formData)
 
-    fetch(`https://clapped.me/api/usr/domain`,
+    fetch(`https://${window.location.host}/api/usr/domain`,
         {
             body: formData,
             method: "POST"
@@ -95,7 +95,7 @@ function delimg(hash) {
     let formData = new FormData();
     formData.append("api_key", document.getElementById("keybox").value)
 
-    fetch(`https://clapped.me/api/delete/${hash}`,
+    fetch(`https://${window.location.host}/api/delete/${hash}`,
         {
             body: formData,
             method: "DELETE"
