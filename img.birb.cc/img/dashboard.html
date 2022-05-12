@@ -85,7 +85,6 @@
             color: white;
         }
 
-
         #images {
             display: grid;
             grid-template-columns: repeat(auto-fit, 200px);
@@ -93,7 +92,7 @@
             align-content: center;
             align-self: center;
             padding-top: 50px;
-            padding-bottom:50px;
+            padding-bottom: 50px;
         }
 
         #images img {
@@ -190,33 +189,53 @@
         }
 
         #showURL {
-            height:20px;
-            width:20px;
-            margin-top:2px;
+            height: 20px;
+            width: 20px;
+            margin-top: 2px;
             filter: invert(100%) hue-rotate(207deg) brightness(1.7);
         }
 
         #submit:hover {
-            cursor:pointer;
+            cursor: pointer;
+        }
+
+        #bottombutton {
+            display: block;
+            right: 0;
+            left: 0;
+            width: fit-content;
+            margin: auto;
+        }
+
+        #bottombutton button {
+            border: none;
+            font-family: "Consolas", "Lucida Console", monospace;
+            font-size: large;
+            height: 40px;
+            margin: 0;
+            font-weight: 900;
+            width: 100px;
+        }
+
+        #bottombutton button:hover{
+            cursor: pointer;
+        }
+
+        #next {
+            display: none;
+            background-color: #424242;
+            color: #FFFFFF;
+            margin-right: 50px;
         }
 
         #nuke {
-            display:none;
+            display: none;
             background-color: #ff0000;
             color: #1F1F1F;
-            font-family: "Consolas", "Lucida Console", monospace;
-            font-size: large;
-            position:absolute;
-            right: 0;
-            left: 0;
-            margin: auto;
-            height: 40px;
-            width: 100px;
-            font-weight: 900;
         }
 
         footer {
-            height:100px
+            height: 100px
         }
     </style>
 </head>
@@ -233,7 +252,7 @@
         <div id=stats>
             <h2>stats:</h2>
             <p id=files>-- files uploaded</p>
-            <p id=gb>-- mb used</p>
+            <p id=gb>-- mb uploaded</p>
             <p id=time>-- since last upload</p>
         </div>
         <div id="info">
@@ -258,8 +277,11 @@
         </div>
     </div>
 
+    <div id="bottombutton">
+        <button id="nuke" onclick="nuke()">nuke</button>
+        <button id="next" onclick="displayPage(1)">more</button>
+    </div>
 
-    <button id="nuke" onclick="nuke()">nuke</button>
 </body>
 
 <footer>

@@ -41,11 +41,6 @@ app.MapPost("/api/img", async Task<IResult> (HttpRequest request) =>
         return Results.Unauthorized();
     }
 
-    else if (UserDB.GetUserFromKey(key.Value).IsAdmin) 
-    {
-        return Results.Ok(FileDB.GetDB());
-    }
-
     else
     {
         List<Img> temp = new List<Img>();
@@ -411,7 +406,7 @@ public static class FileDB
         Save();
 
         File.Delete("img/" + file.Filename);
-        Console.WriteLine("Removed file" + file.Filename);
+        Console.WriteLine("Removed file " + file.Filename);
     }
 
     public static void Nuke(User user)
@@ -422,9 +417,12 @@ public static class FileDB
         {
             if (img.UID == user.UID)
             {
-                Remove(img);
+                db.Remove(img);
+                File.Delete("img/" + img.Filename);
             }
         }
+        Console.WriteLine($"nuked {user.Username}");
+        Save();
     }
 }
 

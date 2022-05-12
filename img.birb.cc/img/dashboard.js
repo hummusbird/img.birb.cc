@@ -1,12 +1,18 @@
+const url = "localhost:7247"
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
+let usrout;
+let imgout;
+let pageCount = 0;
+
 async function login() {
+
+    pageCount = 0;
 
     let formData = new FormData();
     formData.append("api_key", document.getElementById("keybox").value)
 
-    let usrout;
-    let imgout;
-
-    fetch(`https://${window.location.host}/api/usr`,
+    fetch(`https://${url}/api/usr`,
         {
             body: formData,
             method: "post"
@@ -14,97 +20,137 @@ async function login() {
         .then(
             data => {
                 usrout = data
-                console.log(data)
                 document.getElementById("loginstat").innerHTML = "api key:"
                 document.getElementById("loginarea").style.display = "none"
                 document.getElementById("stats").style.display = "initial"
-                document.getElementById("nuke").style.display = "initial"
+
                 document.getElementById("wide").style.display = "flex"
+                document.getElementById("nuke").style.display = "initial"
+                document.getElementById("next").style.display = "initial"
 
-
-                document.getElementById("dashboard").innerHTML = "dashboard - "+ usrout["username"]
+                document.getElementById("dashboard").innerHTML = "dashboard - " + usrout["username"]
                 document.getElementById("uid").innerHTML = usrout["uid"]
                 document.getElementById("showURL").checked = usrout["showURL"]
                 document.getElementById("domain").value = usrout["domain"]
             })
         .catch(e => document.getElementById("loginstat").innerHTML = "invalid key")
 
-    fetch(`https://${window.location.host}/api/img`,
+    displayPage(1)
+}
+
+async function nuke() {
+    document.getElementById("nuke").innerHTML = "wait"
+    await delay(5000);
+    document.getElementById("nuke").innerHTML = "sure?"
+    document.getElementById("nuke").setAttribute("onclick", `definitelyNuke()`)
+}
+
+async function definitelyNuke() {
+    let formData = new FormData();
+    formData.append("api_key", document.getElementById("keybox").value)
+
+    fetch(`https://${url}/api/nuke`,
+        {
+            body: formData,
+            method: "DELETE"
+        }).then(res => res.json())
+        .catch(e => document.getElementById("loginstat").innerHTML = "invalid key")
+
+    document.getElementById("images").innerHTML = null
+    document.getElementById("nuke").innerHTML = "Nuking"
+    await delay(1000);
+
+    location.reload();
+}
+
+function displayPage(x) {
+
+    if (pageCount == 0) {
+        pageCount++
+        loadImages()
+    }
+    else {
+        if (imgout.length < 50) {
+            for (var i = imgout.length - 1; i > 0; i--) {
+                var item = document.createElement("img");
+                item.src = `https://${usrout["domain"]}/` + imgout[i]["filename"]
+                item.setAttribute("onclick", `display("${imgout[i]["filename"]}","${usrout["domain"]}");`)
+                document.getElementById("images").appendChild(item)
+            }
+            document.getElementById("next").style.display = "none"
+
+        }
+        else {
+            pageCount += x
+
+            for (var i = imgout.length - 50 * (pageCount - 1) - 1; i > imgout.length - 50 * (pageCount); i--) {
+                var item = document.createElement("img");
+                item.src = `https://${usrout["domain"]}/` + imgout[i]["filename"]
+                item.setAttribute("onclick", `display("${imgout[i]["filename"]}","${usrout["domain"]}");`)
+                document.getElementById("images").appendChild(item)
+            }
+        }
+    }
+}
+
+function loadImages() {
+    let formData = new FormData();
+    formData.append("api_key", document.getElementById("keybox").value)
+
+    fetch(`https://${url}/api/img`,
         {
             body: formData,
             method: "post"
         }).then(res => res.json())
         .then(
             data => {
-                
                 imgout = data
-
+                console.log(imgout)
                 document.getElementById("files").innerHTML = usrout["uploadCount"] + " files uploaded"
-                document.getElementById("gb").innerHTML = bytes(usrout["uploadedBytes"]) + " used"
+                document.getElementById("gb").innerHTML = bytes(usrout["uploadedBytes"]) + " uploaded"
                 document.getElementById("time").innerHTML = changeToTime(Math.round((new Date().getTime() - Date.parse(data[data.length - 1]["timestamp"])) / 1000 / 60)) + " since last upload"
 
-                for (var i = data.length - 1; i > 0; i--) {
-                    if (data[i]["uid"] == usrout["uid"]){
-                        var item = document.createElement("img");
-                        item.src = `https://${usrout["domain"]}/` + data[i]["filename"]
-                        item.setAttribute("onclick", `display("${data[i]["filename"]}","${usrout["domain"]}");`)
-                        document.getElementById("images").appendChild(item)
-                    }
-                }
+                displayPage(0)
             })
-        .catch(e => document.getElementById("dashboard").innerHTML = "dashboard")
-
+        .catch()
 }
 
 function submitDomain() {
 
-    let formData = new FormData();
-    formData.append("api_key", document.getElementById("keybox").value)
-    formData.append("domain", document.getElementById("domain").value)
-    formData.append("showURL", document.getElementById("showURL").checked)
+    if (document.getElementById("domain").value != null) {
+        let formData = new FormData();
+        formData.append("api_key", document.getElementById("keybox").value)
+        formData.append("domain", document.getElementById("domain").value)
+        formData.append("showURL", document.getElementById("showURL").checked)
 
-    console.log(formData)
+        fetch(`https://${url}/api/usr/domain`,
+            {
+                body: formData,
+                method: "POST"
+            }).then(res => res.json())
+            .catch(e => document.getElementById("loginstat").innerHTML = "invalid key")
 
-    fetch(`https://${window.location.host}/api/usr/domain`,
-        {
-            body: formData,
-            method: "POST"
-        }).then(res => res.json())
-        .then(
-            data => {
+        document.getElementById("images").innerHTML = null
 
-            })
-        .catch(e => document.getElementById("loginstat").innerHTML = "invalid key")
-
-    document.getElementById("images").innerHTML = null
-
-    login()
-
-    
+        login()
+    }
 }
 
 function copyToClipboard(text) {
-
     navigator.clipboard.writeText(text);
-
     document.getElementById("copyurl").innerHTML = "copied!"
 }
 
 function delimg(hash) {
-
     let formData = new FormData();
     formData.append("api_key", document.getElementById("keybox").value)
 
-    fetch(`https://${window.location.host}/api/delete/${hash}`,
+    fetch(`https://${url}/api/delete/${hash}`,
         {
             body: formData,
             method: "DELETE"
         }).then(res => res.json())
-        .then(
-            data => {
-
-            })
-        .catch(e => document.getElementById("loginstat").innerHTML = "invalid key")
+        .catch()
 
     document.getElementById("images").innerHTML = null
 
@@ -113,11 +159,13 @@ function delimg(hash) {
 
 function closePreview() {
     document.getElementById("nuke").style.display = "initial"
+    document.getElementById("next").style.display = "initial"
     document.getElementById("preview").style.display = "none"
 }
 
 function display(filename, domain) {
     document.getElementById("nuke").style.display = "none"
+    document.getElementById("next").style.display = "none"
     document.getElementById("preview").style.display = "initial"
     document.getElementById("copyurl").innerHTML = "copy URL"
     document.getElementById("copyurl").setAttribute("onclick", "copyToClipboard(" + `"https://${domain}/${filename}")`)
