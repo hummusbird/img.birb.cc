@@ -1,4 +1,4 @@
-const url = "localhost:7247"
+const url = window.location.host
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 let usrout;
