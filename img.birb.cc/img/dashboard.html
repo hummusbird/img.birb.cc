@@ -13,6 +13,35 @@
             font-size: x-large;
         }
 
+        #titleblock {
+            display: flex;
+            align-items: center;
+            gap: 20px
+        }
+
+        #titleblock a {
+            position: absolute;
+            color: #ffffff;
+            font-size: x-large;
+            right: 50px
+        }
+
+        #download {
+            display:none;
+            font-family: "Consolas", "Lucida Console", monospace;
+            background: #1F1F1F;
+            font-size: large;
+            color: white;
+            margin: auto;
+            margin-right: 0;
+            width: 200px;
+            height: 50px;
+        }
+
+        #download:hover {
+            cursor: pointer;
+        }
+
         h4 {
             margin: 0;
             padding: 0;
@@ -217,7 +246,7 @@
             width: 100px;
         }
 
-        #bottombutton button:hover{
+        #bottombutton button:hover {
             cursor: pointer;
         }
 
@@ -241,7 +270,11 @@
 </head>
 
 <body>
-    <h1 id="dashboard">dashboard</h1>
+    <div id="titleblock">
+        <h1 id="dashboard">dashboard</h1>
+
+        <button id=download onclick="downloadSXCU()">download SXCU</button>
+    </div>
     <div id="loginarea">
         <h4 id="loginstat">api key:</h4>
         <input id=keybox type="password">
@@ -259,7 +292,8 @@
             <h2>info:</h2>
             <p>uid: <span id=uid>--</span></p>
             <p>showURL: <input id="showURL" type="checkbox"></p>
-            <p>current domain: <input id=domain value="img.birb.cc"> <button id="submit" onclick="submitDomain();">submit</button></p>
+            <p>current domain: <input id=domain value="img.birb.cc"> <button id="submit"
+                    onclick="submitDomain();">submit</button></p>
         </div>
     </div>
 
@@ -267,7 +301,7 @@
 
     </div>
 
-    <div id=preview onclick="">
+    <div id=preview>
         <button id=closePreview onclick="closePreview();">X</button>
         <img id="preview_img" src="">
 
