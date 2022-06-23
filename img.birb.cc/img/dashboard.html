@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-    <script src="dashboard.js"></script>
     <style>
         body {
             padding-left: 40px;
@@ -26,20 +25,19 @@
             right: 50px
         }
 
-        #download {
+        #topbuttons {
             display: none;
+            margin: auto;
+            margin-right: 0;
+        }
+
+        .topbtn {
             font-family: "Consolas", "Lucida Console", monospace;
             background: #1F1F1F;
             font-size: large;
             border: none;
             color: white;
-            margin: auto;
-            margin-right: 0;
-            width: 200px;
-            height: 50px;
-        }
-
-        #download:hover {
+            padding:15px;
             cursor: pointer;
         }
 
@@ -266,7 +264,12 @@
     <div id="titleblock">
         <h1 id="dashboard">dashboard</h1>
 
-        <button id=download onclick="downloadSXCU()">download SXCU</button>
+        <div id="topbuttons">        
+            <input id="upload" type="file" hidden>
+            <button class="topbtn" onclick="downloadSXCU()">download SXCU</button>
+            <label class="topbtn" for="upload">Upload</label>
+        </div>
+
     </div>
     <div id="loginarea">
         <h4 id="loginstat">api key:</h4>
@@ -309,6 +312,7 @@
         <button id="next" onclick="displayPage(1)">more</button>
     </div>
 
+    <script src="dashboard.js"></script>
 </body>
 
 <footer>
