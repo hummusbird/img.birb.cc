@@ -2,42 +2,9 @@
 <html lang="en">
 
 <head>
+    <title>img.birb.cc</title>
     <script src="index.js"></script>
-    <style>
-
-        #titleblock {
-            display: flex;
-            align-items:center;
-            gap: 20px
-        }
-
-        #titleblock a {
-            position: absolute;
-            color: #ffffff;
-            right:50px
-        }
-
-        body {
-            padding-left: 40px;
-            padding-right: 40px;
-            background-color: black;
-            color: white;
-            font-family: "Consolas","Lucida Console",monospace;
-            font-size: x-large;
-        }
-
-        p {
-            font-size: x-large;
-        }
-
-        #q {
-            color: lightgray;
-        }
-
-        #a{
-            color: #f42069;
-        }
-    </style>
+    <link rel="stylesheet" href="./css/index.css">
 </head>
 <body>
     <div id="titleblock">
@@ -47,14 +14,14 @@
     </div>
 
     <h2>faq:</h2>
-    <p id=q>- can i get an api key?</p>
-    <p id=a>no</p>
+    <p class="q">- can i get an api key?</p>
+    <p class="a">no</p>
 
-    <p id=q>- how does it work?</p>
-    <a id=a href="https://github.com/hummusbird/img.birb.cc">like this</a>
+    <p class="q">- how does it work?</p>
+    <a class="a" href="https://github.com/hummusbird/img.birb.cc">like this</a>
 
-    <p id=q>- can i host this myself?</p>
-    <p id=a>yes</p>
+    <p class="q">- can i host this myself?</p>
+    <p class="a">yes</p>
 
     <div id=stats>
         <h2>stats:</h2>
