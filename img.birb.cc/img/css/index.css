@@ -1,0 +1,32 @@
+        #titleblock {
+            display: flex;
+            align-items:center;
+            gap: 20px
+        }
+
+        #titleblock a {
+            position: absolute;
+            color: #ffffff;
+            right:50px
+        }
+
+        body {
+            padding-left: 40px;
+            padding-right: 40px;
+            background-color: black;
+            color: white;
+            font-family: "Consolas","Lucida Console",monospace;
+            font-size: x-large;
+        }
+
+        p {
+            font-size: x-large;
+        }
+
+        .q {
+            color: lightgray;
+        }
+
+        .a{
+            color: #f42069;
+        }
