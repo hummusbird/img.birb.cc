@@ -37,21 +37,21 @@ no, you cannot have an API key.
 ## valid endpoints
 
 ```
-POST /api/upload
+POST /api/upload                (upload a file)
 
-POST /api/usr/new                  // admin only
+POST /api/usr/new               // admin only (create a new user)
 
-POST /api/usr/domain
+POST /api/usr/domain            (change the domain the file link will display)
 
-POST /api/usr
+POST /api/usr                   (get your stats)
 
-POST /api/users
+POST /api/users                 (get information on all users)
 
-GET /api/stats
+GET /api/stats                  (get stats of the site)
 
-POST /api/img
+POST /api/img                   (get hashes of all files you have uploaded)
 
-DELETE /api/delete/{hash}
+DELETE /api/delete/{hash}       (delete a file you have uploaded)
 
-DELETE /api/nuke
+DELETE /api/nuke                (delete all files you have uploaded)
 ```
