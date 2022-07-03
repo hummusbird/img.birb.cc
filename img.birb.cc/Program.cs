@@ -266,7 +266,11 @@ app.MapPost("/api/upload", async (http) =>
     }
 
     Console.WriteLine($"New File: {newFile.Filename}");
-    await http.Response.WriteAsync($"{(user.ShowURL ? "​" : "")}https://{user.Domain}/" + newFile.Filename); // First "" contains zero-width space
+    string[] domains = user.Domain.Split("\r\n");
+    Random rand = new Random(); 
+    string domain = domains[rand.Next(domains.Length)];
+    
+    await http.Response.WriteAsync($"{(user.ShowURL ? "​" : "")}https://{domain}/" + newFile.Filename); // First "" contains zero-width space
     return;
 });
 

@@ -37,7 +37,7 @@
             font-size: large;
             border: none;
             color: white;
-            padding:15px;
+            padding: 15px;
             cursor: pointer;
         }
 
@@ -87,10 +87,11 @@
         }
 
         #domain {
+            resize: none;
             background-color: #1F1F1F;
             border: none;
-            height: 29px;
-            width: 200px;
+            height: 100px;
+            width: 100%;
             font-family: "Consolas", "Lucida Console", monospace;
             font-size: large;
             color: #ffffff;
@@ -101,8 +102,8 @@
             flex-direction: row;
         }
 
-        #info {
-            padding-left: 50px
+        #wide div {
+            padding-right: 50px;
         }
 
         #images {
@@ -264,7 +265,7 @@
     <div id="titleblock">
         <h1 id="dashboard">dashboard</h1>
 
-        <div id="topbuttons">        
+        <div id="topbuttons">
             <input id="upload" type="file" hidden>
             <button class="topbtn" onclick="downloadSXCU()">download SXCU</button>
             <label class="topbtn" for="upload">Upload</label>
@@ -278,18 +279,22 @@
     </div>
 
     <div id=wide>
-        <div id=stats>
+        <div>
             <h2>stats:</h2>
             <p id=files>-- files uploaded</p>
             <p id=gb>-- mb uploaded</p>
             <p id=time>-- since last upload</p>
         </div>
-        <div id="info">
+        <div>
             <h2>info:</h2>
             <p>uid: <span id=uid>--</span></p>
             <p>showURL: <input id="showURL" type="checkbox"></p>
-            <p>current domain: <input id=domain value="img.birb.cc"> <button id="submit"
-                    onclick="submitDomain();">submit</button></p>
+            <p>admin: <span id=isAdmin>--</span></p>
+        </div>
+        <div>
+            <h2>domains:</h2>
+            <textarea id="domain"></textarea>
+            <button id="submit" onclick="submitDomain();">submit</button>
         </div>
     </div>
 
