@@ -32,7 +32,7 @@ body {
     font-size: large;
     border: none;
     color: white;
-    padding:15px;
+    padding: 15px;
     cursor: pointer;
 }
 
@@ -82,10 +82,11 @@ input {
 }
 
 #domain {
+    resize: none;
     background-color: #1F1F1F;
     border: none;
-    height: 29px;
-    width: 200px;
+    height: 100px;
+    width: 100%;
     font-family: "Consolas", "Lucida Console", monospace;
     font-size: large;
     color: #ffffff;
@@ -96,8 +97,8 @@ input {
     flex-direction: row;
 }
 
-#info {
-    padding-left: 50px
+#wide div {
+    padding-right: 50px;
 }
 
 #images {
