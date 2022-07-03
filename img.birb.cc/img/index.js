@@ -14,6 +14,7 @@ function numberWithCommas(x) {
 
 function setTitle() {
     document.getElementById("title").innerHTML = "welcome to " + (window.location.host || "img.birb.cc")
+    document.getElementById("toptitle").innerHTML = (window.location.host || "img.birb.cc")
 }
 
 function changeToSize(x) {
