@@ -216,7 +216,7 @@ input {
 }
 
 #bottombutton {
-    display: block;
+    display: none;
     right: 0;
     left: 0;
     width: fit-content;
@@ -229,7 +229,6 @@ input {
     font-size: large;
     height: 40px;
     margin: 0;
-    width: 100px;
 }
 
 #bottombutton button:hover {
@@ -237,17 +236,28 @@ input {
 }
 
 #next {
-    display: none;
     background-color: #424242;
     color: #FFFFFF;
     margin-right: 50px;
+    width: 50px;
 }
 
 #nuke {
-    display: none;
     background-color: #ff0000;
     color: #1F1F1F;
     font-weight: 900;
+    width: 100px;
+}
+
+#pagenum {
+    height: 40px;
+    width: 20px;
+    text-align: center;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
 }
 
 footer {

@@ -59,7 +59,10 @@
 
     <div id="bottombutton">
         <button id="nuke" onclick="nuke()">nuke</button>
-        <button id="next" onclick="displayPage(1)">more</button>
+        <button id="next" onclick="displayPage(-1)">&lt;</button>
+        <input id="pagenum" type="number" min=1 value=1>
+        <button id="next" onclick="displayPage(1)">&gt;</button>
+
     </div>
 
     <script src="dashboard.js"></script>

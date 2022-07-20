@@ -240,7 +240,7 @@ app.MapPost("/api/upload", async (http) =>
 
     var img = form.Files["img"];
 
-    if (img is null || img.Length == 0) // no file or no exention
+    if (img is null || img.Length == 0) // no file or no file extention
     {
         Console.WriteLine("Invalid upload");
         http.Response.StatusCode = 400;

@@ -1,32 +1,41 @@
-        #titleblock {
-            display: flex;
-            align-items:center;
-            gap: 20px
-        }
+#titleblock {
+    display: flex;
+    align-items: center;
+    gap: 20px
+}
 
-        #titleblock a {
-            position: absolute;
-            color: #ffffff;
-            right:50px
-        }
+#title {
+    white-space: nowrap;
+}
 
-        body {
-            padding-left: 40px;
-            padding-right: 40px;
-            background-color: black;
-            color: white;
-            font-family: "Consolas","Lucida Console",monospace;
-            font-size: x-large;
-        }
+#titleblock a {
+    position: absolute;
+    color: #ffffff;
+    right: 50px
+}
 
-        p {
-            font-size: x-large;
-        }
+#grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+}
 
-        .q {
-            color: lightgray;
-        }
+body {
+    padding-left: 40px;
+    padding-right: 40px;
+    background-color: black;
+    color: white;
+    font-family: "Consolas", "Lucida Console", monospace;
+    font-size: x-large;
+}
 
-        .a{
-            color: #f42069;
-        }
+p {
+    font-size: x-large;
+}
+
+.q {
+    color: lightgray;
+}
+
+.a {
+    color: #f42069;
+}

@@ -6,33 +6,46 @@
     <script src="index.js"></script>
     <link rel="stylesheet" href="./css/index.css">
 </head>
+
 <body>
     <div id="titleblock">
         <h1 id="title">welcome to img.birb.cc</h1>
-        <h5 style="color:gray">v1.5</h5>
-        <a id = login href="dashboard.html">login</a>
+        <h5 style="color:gray">v1.6</h5>
+        <a id=login href="dashboard.html">login</a>
     </div>
 
-    <h2>faq:</h2>
-    <p class="q">- can i get an api key?</p>
-    <p class="a">no</p>
+    <div id=grid>
+        <div id=faq>
+            <h2>faq:</h2>
+            <p class="q">- can i get an api key?</p>
+            <p class="a">no</p>
 
-    <p class="q">- how does it work?</p>
-    <a class="a" href="https://github.com/hummusbird/img.birb.cc">like this</a>
+            <p class="q">- how does it work?</p>
+            <a class="a" href="https://github.com/hummusbird/img.birb.cc">like this</a>
 
-    <p class="q">- can i host this myself?</p>
-    <p class="a">yes</p>
+            <p class="q">- can i host this myself?</p>
+            <p class="a">yes</p>
+        </div>
 
-    <div id=stats>
-        <h2>stats:</h2>
-        <p id=files>-- files uploaded</p>
-        <p id=users>-- registered users</p>
-        <p id=gb>-- mb used</p>
-        <p id=time></p>
-        <script>
-            setTitle();
-            stats();
-            setInterval(stats, 60000)
-        </script>
+        <div id=stats>
+            <h2>stats:</h2>
+            <p id=files>-- files uploaded</p>
+            <p id=users>-- registered users</p>
+            <p id=gb>-- mb used</p>
+            <p id=time>-- since last upload</p>
+            <script>
+                setTitle();
+                stats();
+                setInterval(stats, 60000)
+            </script>
+        </div>
+
+        <div id="changelog">
+            <h2>v1.6 changelog:</h2>
+            <p class="q">- fixed first image not loading</p>
+            <p class="q">- fixed random load instability</p>
+            <p class="q">- added pagination</p>
+            <p class="q">- added 100mb warning to upload button</p>
+        </div>
     </div>
 </body>
