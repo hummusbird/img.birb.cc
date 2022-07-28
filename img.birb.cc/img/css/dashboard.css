@@ -109,6 +109,20 @@ input {
     padding-bottom: 50px;
 }
 
+#images video {
+    width: 100%;
+    align-self: center;
+    max-height: 300px;
+    min-height: 100px;
+    object-fit: cover;
+    transition: 0.15s;
+}
+
+#images video:hover {
+    transform: scale(1.15);
+    cursor: pointer;
+}
+
 #images img {
     width: 100%;
     align-self: center;
@@ -123,7 +137,7 @@ input {
     cursor: pointer;
 }
 
-#preview {
+#preview {  
     display: none;
     position: fixed;
     top: 0;
@@ -132,6 +146,17 @@ input {
     height: 100vh;
     width: 100vw;
     backdrop-filter: blur(5px);
+}
+
+#preview video {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    margin: auto;
+    max-width: 90vw;
+    max-height: 90vh;
 }
 
 #preview img {
