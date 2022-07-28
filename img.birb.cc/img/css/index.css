@@ -10,8 +10,12 @@
 
 #titleblock a {
     position: absolute;
-    color: #ffffff;
+    color: white;
     right: 50px
+}
+
+#version{
+    color:lightgray;
 }
 
 #grid {

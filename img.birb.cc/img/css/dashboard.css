@@ -58,7 +58,7 @@ h2 {
     width: 100px;
     height: 50px;
     border: none;
-    color: #ffffff;
+    color: white;
     font-family: "Consolas", "Lucida Console", monospace;
     font-size: large;
     cursor: pointer;
@@ -76,7 +76,7 @@ input {
     width: 400px;
     font-family: "Consolas", "Lucida Console", monospace;
     font-size: large;
-    color: #ffffff;
+    color: white;
     padding-left: 15px;
     padding-right: 15px;
 }
@@ -89,7 +89,7 @@ input {
     width: 100%;
     font-family: "Consolas", "Lucida Console", monospace;
     font-size: large;
-    color: #ffffff;
+    color: white;
 }
 
 #wide {
@@ -137,7 +137,7 @@ input {
     cursor: pointer;
 }
 
-#preview {  
+#preview {
     display: none;
     position: fixed;
     top: 0;
@@ -185,7 +185,7 @@ input {
     cursor: pointer;
 }
 
-#buttons button {
+#preview_buttons button {
     font-family: "Consolas", "Lucida Console", monospace;
     background-color: #131313;
     border: none;
@@ -195,29 +195,36 @@ input {
     font-size: large;
 }
 
-#buttons {
+#preview_buttons button:hover {
+    cursor: pointer;
+}
+
+#preview_buttons {
     position: absolute;
-    bottom: 30px;
+    bottom: 10px;
     right: 0;
     left: 0;
     margin: auto;
-    width: fit-content
+    width: fit-content;
+}
+
+#preview_info {
+    color: lightgray;
+    z-index: 5;
+    position: absolute;
+    top: 10px;
+    right: 0;
+    left: 0;
+    margin: auto;
+    width: fit-content;
 }
 
 #copyurl {
     color: white;
 }
 
-#copyurl:hover {
-    cursor: pointer
-}
-
 #delete {
-    color: #ff0000;
-}
-
-#delete:hover {
-    cursor: pointer;
+    color: red
 }
 
 #submit {
@@ -268,7 +275,7 @@ input {
 }
 
 #nuke {
-    background-color: #ff0000;
+    background-color: red;
     color: #1F1F1F;
     font-weight: 900;
     width: 100px;
