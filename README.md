@@ -1,12 +1,12 @@
 # img.birb.cc
 
-C# image host.
+img.birb.cc is a ShareX compatible C# image host, privately hosted by me.
 
 no, you cannot have an API key.
 
 ## how to host yourself
 
-- clone the repo OR download the published build. 
+- clone the repo.
 - install NGINX and dotnet.
 - use this config in nginx
 
