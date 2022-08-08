@@ -10,6 +10,7 @@
 *.userosscache
 *.sln.docstates
 img.json
+salt.txt
 user.json
 
 # User-specific files (MonoDevelop/Xamarin Studio)

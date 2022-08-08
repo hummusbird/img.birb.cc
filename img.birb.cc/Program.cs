@@ -77,6 +77,7 @@ app.MapPost("/api/usr/new", async Task<IResult> (HttpRequest request) =>
 
     string NewUsername;
     int NewUID = 0;
+    string NewKey = Hashing.NewHash(40);
 
     if (string.IsNullOrEmpty(username.Value) || UserDB.GetUserFromUsername(username.Value) is not null)
     {
@@ -101,13 +102,18 @@ app.MapPost("/api/usr/new", async Task<IResult> (HttpRequest request) =>
         }
     }
 
+    while (UserDB.GetUserFromKey(NewKey) is not null)
+    {
+        NewKey = Hashing.NewHash(40);
+    }
+
     User newUser = new User
     {
         Username = NewUsername,
         IsAdmin = false,
         UID = NewUID,
         UploadCount = 0,
-        APIKey = User.NewHash(40),
+        APIKey = NewKey,
         ShowURL = true,
         Domain = "img.birb.cc"
     };
@@ -119,10 +125,10 @@ app.MapPost("/api/usr/new", async Task<IResult> (HttpRequest request) =>
     SXCU += "\"Name\": \"birb.cc\",\n";
     SXCU += "\"DestinationType\": \"ImageUploader\",\n";
     SXCU += "\"RequestMethod\": \"POST\",\n";
-    SXCU += "\"RequestURL\": \"https://img.birb.cc/api/upload\",\n";
+    SXCU += $"\"RequestURL\": \"https://{newUser.Domain}/api/upload\",\n";
     SXCU += "\"Body\": \"MultipartFormData\",\n";
     SXCU += "\"Arguments\": {\n";
-    SXCU += $"\"api_key\": \"{newUser.APIKey}\"\n";
+    SXCU += $"\"api_key\": \"{NewKey}\"\n";
     SXCU += "},\n";
     SXCU += "\"FileFormName\": \"img\"\n";
     SXCU += "}";
@@ -267,8 +273,7 @@ app.MapPost("/api/upload", async (http) =>
 
     Console.WriteLine($"New File: {newFile.Filename}");
     string[] domains = user.Domain.Split("\r\n");
-    Random rand = new Random(); 
-    string domain = domains[rand.Next(domains.Length)];
+    string domain = domains[Hashing.rand.Next(domains.Length)];
     
     await http.Response.WriteAsync($"{(user.ShowURL ? "​" : "")}https://{domain}/" + newFile.Filename); // First "" contains zero-width space
     return;
@@ -325,12 +330,58 @@ app.MapDelete("/api/nuke", async Task<IResult> (HttpRequest request) =>
     return Results.Ok();
 });
 
+Hashing.LoadSalt();
 FileDB.Load();
 UserDB.Load();
 
 app.UseCors(MyAllowSpecificOrigins);
 
 app.Run();
+
+public static class Hashing
+{
+    public static Random rand = new Random();
+    private static string? salt;
+
+    public static void LoadSalt()
+    {
+        try
+        {
+            using (StreamReader SR = new StreamReader("salt.txt"))
+            {
+                salt = SR.ReadToEnd();
+            }
+            Console.WriteLine($"Loaded salt");
+        }
+        catch
+        {
+            Console.WriteLine($"Unable to load salt");
+        }
+
+        if (!File.Exists("salt.txt"))
+        {
+            Console.WriteLine("Generating new salt. Keep this safe!!!");
+            using (StreamWriter SW = new StreamWriter("salt.txt"))
+            {
+                salt = NewHash(40);
+                SW.WriteLine(salt);
+            }
+        }
+    }
+
+    public static string NewHash(int length)
+    {
+        string b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        string hash = String.Empty;
+        for (int i = 0; i < length; i++)
+        {
+            hash += b64[rand.Next(b64.Length)];
+        }
+
+        return hash;
+    }
+}
 
 public class Stats
 {
@@ -432,8 +483,6 @@ public static class FileDB
 
 public class Img
 {
-    static Random random = new Random();
-
     public string? Hash { get; set; }
     public string? Filename { get; set; }
     public int UID { get; set; }
@@ -442,7 +491,13 @@ public class Img
 
     public void NewImg(int uid, string extension, IFormFile img)
     {
-        this.Hash = NewHash(8);
+        string newHash = Hashing.NewHash(8);
+        while (FileDB.Find(newHash) is not null)
+        {
+            newHash = Hashing.NewHash(8);
+        }
+
+        this.Hash = newHash;
         this.Filename = this.Hash + extension;
         this.UID = uid;
         this.Timestamp = DateTime.Now;
@@ -453,29 +508,10 @@ public class Img
 
         FileDB.Add(this);
     }
-
-    static string NewHash(int length)
-    {
-        string b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        string hash = "";
-
-        while (FileDB.Find(hash) is not null || string.IsNullOrEmpty(hash))
-        {
-            hash = String.Empty;
-            for (int i = 0; i < length; i++)
-            {
-                hash += b64[random.Next(b64.Length)];
-            }
-        }
-
-        return hash;
-    }
 }
 
 public class User
 {
-    static Random random = new Random();
-
     public bool IsAdmin { get; set; }
     public string? Username { get; set; }
     public int UID { get; set; }
@@ -483,6 +519,7 @@ public class User
     public long UploadedBytes { get; set; } = 0;
     public string? APIKey { get; set; }
     public string? Domain { get; set; } = "img.birb.cc";
+    public string? DashMsg { get; set; }
     public bool ShowURL { get; set; }
 
     public UserDTO UserToDTO()
@@ -494,23 +531,6 @@ public class User
             UploadedBytes = this.UploadedBytes,
             UploadCount = this.UploadCount
         };
-    }
-
-    public static string NewHash(int length)
-    {
-        string b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        string hash = "";
-
-        while (UserDB.GetUserFromKey(hash) is not null || string.IsNullOrEmpty(hash))
-        {
-            hash = String.Empty;
-            for (int i = 0; i < length; i++)
-            {
-                hash += b64[random.Next(b64.Length)];
-            }
-        }
-
-        return hash;
     }
 }
 
@@ -545,7 +565,7 @@ public static class UserDB
             Console.WriteLine($"Unable to load {path}");
         }
 
-        if (!File.Exists(path) || db.Count == 0)
+        if (!File.Exists(path) || db.Count == 0) // Generate default admin account
         {
             Console.WriteLine("Generated default Admin account");
             User newUser = new User
@@ -554,7 +574,7 @@ public static class UserDB
                 IsAdmin = true,
                 UID = 0,
                 UploadCount = 0,
-                APIKey = User.NewHash(40),
+                APIKey = Hashing.NewHash(40),
                 ShowURL = true,
                 Domain = "img.birb.cc"
             };
