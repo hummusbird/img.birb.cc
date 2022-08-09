@@ -302,3 +302,10 @@ input::-webkit-inner-spin-button {
 footer {
     height: 100px
 }
+
+#charcount {
+    float: right;
+    font-family: "Consolas", "Lucida Console", monospace;
+    font-size: large;
+    color: #ffffff;
+}
