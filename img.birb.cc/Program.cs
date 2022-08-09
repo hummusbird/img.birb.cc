@@ -167,7 +167,7 @@ app.MapPost("/api/usr/settings", async Task<IResult> (HttpRequest request) =>
 
     if (!string.IsNullOrEmpty(dashMsg.Value))
     {
-        user.DashMsg = dashMsg.Value.ToString().Length < 100 ? Regex.Replace(dashMsg.Value.ToString(), @"[^\u0020-\u007E]", string.Empty) : Regex.Replace(dashMsg.Value.ToString(), @"[^\u0020-\u007E]", string.Empty).Substring(0, 100);
+        user.DashMsg = Regex.Replace(dashMsg.Value.ToString().Length < 100 ? dashMsg.Value.ToString() : dashMsg.Value.ToString().Substring(0, 100), @"[^\u0020-\u007E]", string.Empty);
     }
     else
     {

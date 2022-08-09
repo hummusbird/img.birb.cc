@@ -93,6 +93,14 @@ textarea {
     color: white;
 }
 
+#charcount {
+    float: right;
+    padding-right: 0px !important;
+    font-family: "Consolas", "Lucida Console", monospace;
+    font-size: large;
+    color: #ffffff;
+}
+
 #wide {
     gap: 50px;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -302,3 +310,4 @@ input::-webkit-inner-spin-button {
 footer {
     height: 100px
 }
+
