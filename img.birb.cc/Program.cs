@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Http.Features;
+using System.Security.Cryptography;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -113,7 +114,7 @@ app.MapPost("/api/usr/new", async Task<IResult> (HttpRequest request) =>
         IsAdmin = false,
         UID = NewUID,
         UploadCount = 0,
-        APIKey = NewKey,
+        APIKey = Hashing.HashString(NewKey),
         ShowURL = true,
         Domain = "img.birb.cc"
     };
@@ -188,10 +189,10 @@ app.MapPost("/api/users", async Task<IResult> (HttpRequest request) =>
 
     if (UserDB.GetUserFromKey(key.Value).IsAdmin)
     {
-        return Results.Ok(UserDB.GetDB());
+        return Results.Ok(UserDB.GetDB().Select(x => x.UsrToDTO()).ToList());
     }
 
-    return Results.Ok(UserDB.GetDB().Select(x => x.UserToDTO()).ToList());
+    return Results.Ok(UserDB.GetDB().Select(x => x.UsersToDTO()).ToList());
 });
 
 app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) =>
@@ -209,7 +210,7 @@ app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) =>
         return Results.Unauthorized();
     }
 
-    return Results.Ok(UserDB.GetDB().Find(uid => uid.UID == UserDB.GetUserFromKey(key.Value).UID));
+    return Results.Ok(UserDB.GetDB().Find(uid => uid.UID == UserDB.GetUserFromKey(key.Value).UID).UsrToDTO());
 });
 
 app.MapGet("/api/stats", async () =>
@@ -358,7 +359,7 @@ public static class Hashing
             Console.WriteLine($"Unable to load salt");
         }
 
-        if (!File.Exists("salt.txt"))
+        if (!File.Exists("salt.txt") || string.IsNullOrEmpty(salt))
         {
             Console.WriteLine("Generating new salt. Keep this safe!!!");
             using (StreamWriter SW = new StreamWriter("salt.txt"))
@@ -367,6 +368,16 @@ public static class Hashing
                 SW.WriteLine(salt);
             }
         }
+    }
+
+    public static string HashString(string input) // yes, i know the use of "hash" is very inconsistent. shut up.
+    {
+        byte[] hash;
+        using (SHA512 shaM = new SHA512Managed())
+        {
+            hash = shaM.ComputeHash(System.Text.Encoding.UTF8.GetBytes(input + salt));
+        }
+        return Convert.ToBase64String(hash);
     }
 
     public static string NewHash(int length)
@@ -522,9 +533,9 @@ public class User
     public string? DashMsg { get; set; }
     public bool ShowURL { get; set; }
 
-    public UserDTO UserToDTO()
+    public UsersDTO UsersToDTO()
     {
-        return new UserDTO
+        return new UsersDTO
         {
             Username = this.Username,
             UID = this.UID,
@@ -532,14 +543,41 @@ public class User
             UploadCount = this.UploadCount
         };
     }
+
+    public UsrDTO UsrToDTO()
+    {
+        return new UsrDTO
+        {
+            IsAdmin = this.IsAdmin,
+            Username = this.Username,
+            UID = this.UID,
+            UploadCount = this.UploadCount,
+            UploadedBytes = this.UploadedBytes,
+            Domain = this.Domain,
+            DashMsg = this.DashMsg,
+            ShowURL = this.ShowURL
+        };
+    }
 }
 
-public class UserDTO
+public class UsersDTO // used for /api/users
 {
     public string? Username { get; set; }
     public int UID { get; set; }
     public long UploadedBytes { get; set; } = 0;
     public int UploadCount { get; set; } = 0;
+}
+
+public class UsrDTO // used for /api/usr
+{
+    public bool IsAdmin { get; set; }
+    public string? Username { get; set; }
+    public int UID { get; set; }
+    public int UploadCount { get; set; } = 0;
+    public long UploadedBytes { get; set; } = 0;
+    public string? Domain { get; set; } = "img.birb.cc";
+    public string? DashMsg { get; set; }
+    public bool ShowURL { get; set; }
 }
 
 public static class UserDB
@@ -567,6 +605,7 @@ public static class UserDB
 
         if (!File.Exists(path) || db.Count == 0) // Generate default admin account
         {
+            string apikey = Hashing.NewHash(40);
             Console.WriteLine("Generated default Admin account");
             User newUser = new User
             {
@@ -574,11 +613,11 @@ public static class UserDB
                 IsAdmin = true,
                 UID = 0,
                 UploadCount = 0,
-                APIKey = Hashing.NewHash(40),
+                APIKey = Hashing.HashString(apikey),
                 ShowURL = true,
                 Domain = "img.birb.cc"
             };
-            Console.WriteLine("API-KEY: " + newUser.APIKey + " \nKeep this safe");
+            Console.WriteLine("API-KEY: " + apikey + " \nKeep this safe");
             AddUser(newUser);
         }
     }
@@ -622,6 +661,6 @@ public static class UserDB
 
     public static User GetUserFromKey(string key)
     {
-        return db.Find(user => user.APIKey == key);
+        return db.Find(user => user.APIKey == Hashing.HashString(key));
     }
 }
