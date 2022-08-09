@@ -8,6 +8,14 @@ async function stats() {
     document.getElementById("time").innerHTML = changeToTime(Math.round((new Date().getTime() - Date.parse(parsed.newest)) / 1000 / 60)) + " since last upload"
 }
 
+async function dashmsg() {
+    let res = await fetch("/api/dashmsg")
+    let parsed = await res.json()
+    console.log(parsed)
+    document.getElementById("username").innerHTML = "- " + parsed.username
+    document.getElementById("message").innerText = parsed.dashMsg
+}
+
 function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }

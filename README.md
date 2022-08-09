@@ -31,6 +31,7 @@ no, you cannot have an API key.
 }
 ```
 
+- symlink or set the root folder to /img/
 - run the .dll
 - a default admin api key will be generated. Use this to add new accounts.
 
@@ -41,11 +42,13 @@ POST /api/upload
 
 POST /api/usr/new                  // admin only
 
-POST /api/usr/domain
+POST /api/usr/settings
 
 POST /api/usr
 
 POST /api/users
+
+GET /api/dashmsg
 
 GET /api/stats
 

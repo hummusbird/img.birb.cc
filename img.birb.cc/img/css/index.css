@@ -20,6 +20,7 @@
 
 #grid {
     display: grid;
+    gap: 50px;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
 }
 
@@ -30,6 +31,10 @@ body {
     color: white;
     font-family: "Consolas", "Lucida Console", monospace;
     font-size: x-large;
+}
+
+#message {
+    overflow-wrap: break-word;
 }
 
 p {

@@ -36,10 +36,15 @@
             <p>showURL: <input id="showURL" type="checkbox"></p>
             <p>admin: <span id=isAdmin>--</span></p>
         </div>
-        <div>
+        <div class="yeswrap">
             <h2>domains:</h2>
             <textarea id="domain"></textarea>
-            <button id="submit" onclick="submitDomain();">submit</button>
+            <button id="submit" onclick="submitSettings();">submit</button>
+        </div>
+        <div class="yeswrap">
+            <h2>feedback:</h2>
+            <textarea id="feedback" maxlength="100"></textarea>
+            <button id="submit" onclick="submitSettings();">submit</button>
         </div>
     </div>
 

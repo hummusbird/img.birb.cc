@@ -8,6 +8,7 @@ body {
 }
 
 #titleblock {
+    white-space: nowrap;
     display: flex;
     align-items: center;
     gap: 20px
@@ -81,7 +82,7 @@ input {
     padding-right: 15px;
 }
 
-#domain {
+textarea {
     resize: none;
     background-color: #1F1F1F;
     border: none;
@@ -93,12 +94,18 @@ input {
 }
 
 #wide {
+    gap: 50px;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     display: none;
-    flex-direction: row;
+    white-space: nowrap;
 }
 
 #wide div {
     padding-right: 50px;
+}
+
+.yeswrap {
+    white-space:initial;
 }
 
 #images {

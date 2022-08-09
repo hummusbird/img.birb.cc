@@ -10,7 +10,7 @@
 <body>
     <div id=titleblock>
         <h1 id=title>welcome to img.birb.cc</h1>
-        <h5 id=version>v1.7</h5>
+        <h5 id=version>v1.8</h5>
         <a id=login href="dashboard.html">login</a>
     </div>
 
@@ -36,15 +36,23 @@
             <script>
                 setTitle();
                 stats();
+                dashmsg();
                 setInterval(stats, 60000)
             </script>
         </div>
 
         <div id="changelog">
-            <h2>v1.7 changelog:</h2>
-            <p class="q">- fixed videos not previewing correctly</p>
-            <p class="q">- fixed video thumbnails</p>
-            <p class="q">- added filename and timestamp on preview</p>
+            <h2>v1.8 changelog:</h2>
+            <p class="q">- new user feedback panel</p>
+            <p class="q">- tidied up /api/usr & /api/users</p>
+            <p class="q">- hashed & salted API keys</p>
+            <p class="q">- a few more backend changes</p>
+        </div>
+
+        <div>
+            <h2>user feedback:</h2>
+            <p class="q" id="message">--</p>
+            <p class="a" id="username">--</p>
         </div>
     </div>
 </body>

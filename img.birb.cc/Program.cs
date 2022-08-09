@@ -45,10 +45,11 @@ app.MapPost("/api/img", async Task<IResult> (HttpRequest request) =>
     else
     {
         List<Img> temp = new List<Img>();
+        User user = UserDB.GetUserFromKey(key.Value);
 
         foreach (var img in FileDB.GetDB())
         {
-            if (img.UID == UserDB.GetUserFromKey(key.Value).UID)
+            if (img.UID == user.UID)
             {
                 temp.Add(img);
             }
@@ -137,7 +138,7 @@ app.MapPost("/api/usr/new", async Task<IResult> (HttpRequest request) =>
     return Results.Text(SXCU);
 });
 
-app.MapPost("/api/usr/domain", async Task<IResult> (HttpRequest request) =>
+app.MapPost("/api/usr/settings", async Task<IResult> (HttpRequest request) =>
 {
     if (!request.HasFormContentType)
     {
@@ -153,19 +154,29 @@ app.MapPost("/api/usr/domain", async Task<IResult> (HttpRequest request) =>
     }
 
     var domain = form.ToList().Find(newDomain => newDomain.Key == "domain");
-
-    string NewDomain;
-
+    var dashMsg = form.ToList().Find(dashMsg => dashMsg.Key == "dashMsg");
     var showURL = form.ToList().Find(showURL => showURL.Key == "showURL");
+
+    User user = UserDB.GetUserFromKey(key.Value);
 
     if (!string.IsNullOrEmpty(showURL.Value) && showURL.Value == "true" || showURL.Value == "false")
     {
-        UserDB.GetUserFromKey(key.Value).ShowURL = System.Convert.ToBoolean(showURL.Value);
+        user.ShowURL = System.Convert.ToBoolean(showURL.Value);
     }
 
-    NewDomain = domain.Value;
+    if (!string.IsNullOrEmpty(dashMsg.Value))
+    {
+        user.DashMsg = dashMsg.Value.ToString().Length < 100 ? dashMsg.Value.ToString() : dashMsg.Value.ToString().Substring(0, 100);
+    }
+    else
+    {
+        user.DashMsg = null;
+    }
 
-    UserDB.GetUserFromKey(key.Value).Domain = NewDomain;
+    if (!string.IsNullOrEmpty(domain.Value))
+    {
+        user.Domain = domain.Value;
+    }
 
     UserDB.Save();
 
@@ -211,6 +222,20 @@ app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) =>
     }
 
     return Results.Ok(UserDB.GetDB().Find(uid => uid.UID == UserDB.GetUserFromKey(key.Value).UID).UsrToDTO());
+});
+
+app.MapGet("/api/dashmsg", () =>
+{
+    List<DashDTO> usrlist = new List<DashDTO>();
+    foreach (User user in UserDB.GetDB())
+    {
+        if (!string.IsNullOrEmpty(user.DashMsg))
+        {
+            usrlist.Add(user.DashToDTO());
+        }
+    }
+
+    return usrlist.Count == 0 ? Results.NoContent() : Results.Ok(usrlist[Hashing.rand.Next(usrlist.Count)]);
 });
 
 app.MapGet("/api/stats", async () =>
@@ -558,6 +583,15 @@ public class User
             ShowURL = this.ShowURL
         };
     }
+
+    public DashDTO DashToDTO()
+    {
+        return new DashDTO
+        {
+            Username = this.Username,
+            DashMsg = this.DashMsg
+        };
+    }
 }
 
 public class UsersDTO // used for /api/users
@@ -578,6 +612,12 @@ public class UsrDTO // used for /api/usr
     public string? Domain { get; set; } = "img.birb.cc";
     public string? DashMsg { get; set; }
     public bool ShowURL { get; set; }
+}
+
+public class DashDTO // userd for /api/dashmsg
+{
+    public string? Username { get; set; }
+    public string? DashMsg { get; set; }
 }
 
 public static class UserDB
