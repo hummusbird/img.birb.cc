@@ -3,7 +3,7 @@ body {
     padding-right: 40px;
     background-color: black;
     color: white;
-    font-family: "Consolas", "Lucida Console", monospace;
+    font-family: "Menlo", "Consolas", "Lucida Console", monospace;
     font-size: x-large;
 }
 
@@ -28,7 +28,7 @@ body {
 }
 
 .topbtn {
-    font-family: "Consolas", "Lucida Console", monospace;
+    font-family: "Menlo", "Consolas", "Lucida Console", monospace;
     background: #1F1F1F;
     font-size: large;
     border: none;
@@ -60,7 +60,7 @@ h2 {
     height: 50px;
     border: none;
     color: white;
-    font-family: "Consolas", "Lucida Console", monospace;
+    font-family: "Menlo", "Consolas", "Lucida Console", monospace;
     font-size: large;
     cursor: pointer;
 }
@@ -75,7 +75,7 @@ input {
     border: none;
     height: 50px;
     width: 400px;
-    font-family: "Consolas", "Lucida Console", monospace;
+    font-family: "Menlo", "Consolas", "Lucida Console", monospace;
     font-size: large;
     color: white;
     padding-left: 15px;
@@ -88,7 +88,7 @@ textarea {
     border: none;
     height: 100px;
     width: 100%;
-    font-family: "Consolas", "Lucida Console", monospace;
+    font-family: "Menlo", "Consolas", "Lucida Console", monospace;
     font-size: large;
     color: white;
 }
@@ -96,7 +96,7 @@ textarea {
 #charcount {
     float: right;
     padding-right: 0px !important;
-    font-family: "Consolas", "Lucida Console", monospace;
+    font-family: "Menlo", "Consolas", "Lucida Console", monospace;
     font-size: large;
     color: #ffffff;
 }
@@ -188,7 +188,7 @@ textarea {
 #closePreview {
     background-color: #131313;
     font-size: x-large;
-    font-family: "Consolas", "Lucida Console", monospace;
+    font-family: "Menlo", "Consolas", "Lucida Console", monospace;
     width: 60px;
     height: 60px;
     margin: 20px;
@@ -201,7 +201,7 @@ textarea {
 }
 
 #preview_buttons button {
-    font-family: "Consolas", "Lucida Console", monospace;
+    font-family: "Menlo", "Consolas", "Lucida Console", monospace;
     background-color: #131313;
     border: none;
     padding: 10px;
@@ -246,7 +246,7 @@ textarea {
     background-color: #1F1F1F;
     border: none;
     height: 31px;
-    font-family: "Consolas", "Lucida Console", monospace;
+    font-family: "Menlo", "Consolas", "Lucida Console", monospace;
     font-size: large;
     color: #ffffff;
 }
@@ -272,7 +272,7 @@ textarea {
 
 #bottombutton button {
     border: none;
-    font-family: "Consolas", "Lucida Console", monospace;
+    font-family: "Menlo", "Consolas", "Lucida Console", monospace;
     font-size: large;
     height: 40px;
     margin: 0;
