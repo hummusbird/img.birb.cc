@@ -240,7 +240,7 @@ app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) =>
         return Results.Unauthorized();
     }
 
-    return Results.Ok(UserDB.GetDB().Find(uid => uid.UID == UserDB.GetUserFromKey(key.Value).UID).UsrToDTO());
+    return Results.Ok(UserDB.GetDB().Find(uid => uid.UID == UserDB.GetUserFromKey(key.Value).UID)!.UsrToDTO());
 });
 
 app.MapGet("/api/dashmsg", () =>
@@ -271,7 +271,7 @@ app.MapGet("/api/stats", async () =>
 
 app.MapPost("/api/upload", async (http) =>
 {
-    http.Features.Get<IHttpMaxRequestBodySizeFeature>().MaxRequestBodySize = null; // removes max filesize (set max in NGINX, not here)
+    http.Features.Get<IHttpMaxRequestBodySizeFeature>()!.MaxRequestBodySize = null; // removes max filesize (set max in NGINX, not here)
 
 
     if (!http.Request.HasFormContentType)
@@ -317,7 +317,7 @@ app.MapPost("/api/upload", async (http) =>
     }
 
     Console.WriteLine($"New File: {newFile.Filename}");
-    string[] domains = user.Domain.Split("\r\n");
+    string[] domains = user.Domain!.Split("\r\n");
     string domain = domains[Hashing.rand.Next(domains.Length)];
 
     await http.Response.WriteAsync($"{(user.ShowURL ? "​" : "")}https://{domain}/" + newFile.Filename); // First "" contains zero-width space
@@ -417,7 +417,7 @@ public static class Hashing
     public static string HashString(string input) // yes, i know the use of "hash" is very inconsistent. shut up.
     {
         byte[] hash;
-        using (SHA512 shaM = new SHA512Managed())
+        using (SHA512 shaM = SHA512.Create())
         {
             hash = shaM.ComputeHash(System.Text.Encoding.UTF8.GetBytes(input + salt));
         }
@@ -463,7 +463,7 @@ public static class FileDB
 
     public static void Add(Img file)
     {
-        if (Find(file.Hash) is null)
+        if (Find(file.Hash!) is null)
         {
             db.Add(file);
             Save();
@@ -478,7 +478,7 @@ public static class FileDB
             {
                 string json = SR.ReadToEnd();
 
-                db = JsonConvert.DeserializeObject<List<Img>>(json);
+                db = JsonConvert.DeserializeObject<List<Img>>(json)!;
                 Save();
             }
             Console.WriteLine($"Loaded DB of length {db.Count}");
@@ -652,17 +652,17 @@ public static class UserDB
             {
                 string json = SR.ReadToEnd();
 
-                db = JsonConvert.DeserializeObject<List<User>>(json);
+                db = JsonConvert.DeserializeObject<List<User>>(json)!;
                 Save();
             }
-            Console.WriteLine($"Loaded DB of length {db.Count}");
+            Console.WriteLine($"Loaded DB of length {db!.Count}");
         }
         catch
         {
             Console.WriteLine($"Unable to load {path}");
         }
 
-        if (!File.Exists(path) || db.Count == 0) // Generate default admin account
+        if (!File.Exists(path) || db!.Count == 0) // Generate default admin account
         {
             string apikey = Hashing.NewHash(40);
             Console.WriteLine("Generated default Admin account");
