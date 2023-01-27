@@ -141,20 +141,7 @@ app.MapPost("/api/usr/new", async Task<IResult> (HttpRequest request) =>
 
     UserDB.AddUser(newUser);
 
-    string SXCU = "{\n";
-    SXCU += "\"Version\": \"13.7.0\",\n";
-    SXCU += "\"Name\": \"birb.cc\",\n";
-    SXCU += "\"DestinationType\": \"ImageUploader\",\n";
-    SXCU += "\"RequestMethod\": \"POST\",\n";
-    SXCU += $"\"RequestURL\": \"https://{newUser.Domain}/api/upload\",\n";
-    SXCU += "\"Body\": \"MultipartFormData\",\n";
-    SXCU += "\"Arguments\": {\n";
-    SXCU += $"\"api_key\": \"{NewKey}\"\n";
-    SXCU += "},\n";
-    SXCU += "\"FileFormName\": \"img\"\n";
-    SXCU += "}";
-
-    return Results.Text(SXCU);
+    return Results.Text(NewUsername + ": " + NewKey);
 });
 
 app.MapPost("/api/usr/settings", async Task<IResult> (HttpRequest request) =>
