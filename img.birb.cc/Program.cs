@@ -3,12 +3,16 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Http.Features;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.FileProviders;
 
 // TODO:
 // remove useless if statements
 // actually check fileheaders
 // serve html + css from the host
 // check foreach loops and use dict instead maybe possibly idk
+// hostname loaded from file
+// admin panel
+// key rotation
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -25,6 +29,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+
 string[] fileTypes = { ".jpg", ".jpeg", ".png", ".gif", ".mp4", ".mp3", ".wav" };
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions
@@ -34,9 +39,11 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 
 app.UseHttpsRedirection();
 
-app.MapGet("/", () =>
+app.UseStaticFiles(new StaticFileOptions
 {
-    return Results.Ok("guh");
+    FileProvider = new PhysicalFileProvider(
+           Path.Combine(builder.Environment.ContentRootPath, "img")),
+    RequestPath = ""
 });
 
 app.MapPost("/api/img", async Task<IResult> (HttpRequest request) =>
