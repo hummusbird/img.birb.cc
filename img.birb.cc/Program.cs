@@ -4,6 +4,12 @@ using Microsoft.AspNetCore.Http.Features;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
+// TODO:
+// remove useless if statements
+// actually check fileheaders
+// serve html + css from the host
+// check foreach loops and use dict instead maybe possibly idk
+
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,6 +33,11 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 });
 
 app.UseHttpsRedirection();
+
+app.MapGet("/", () =>
+{
+    return Results.Ok("guh");
+});
 
 app.MapPost("/api/img", async Task<IResult> (HttpRequest request) =>
 {
@@ -301,7 +312,7 @@ app.MapPost("/api/upload", async (http) =>
     Console.WriteLine($"New File: {newFile.Filename}");
     string[] domains = user.Domain.Split("\r\n");
     string domain = domains[Hashing.rand.Next(domains.Length)];
-    
+
     await http.Response.WriteAsync($"{(user.ShowURL ? "​" : "")}https://{domain}/" + newFile.Filename); // First "" contains zero-width space
     return;
 });
@@ -339,7 +350,7 @@ app.MapDelete("/api/delete/{hash}", async Task<IResult> (HttpRequest request, st
 
 app.MapDelete("/api/nuke", async Task<IResult> (HttpRequest request) =>
 {
-    if (!request.HasFormContentType )
+    if (!request.HasFormContentType)
     {
         return Results.BadRequest();
     }
@@ -353,7 +364,7 @@ app.MapDelete("/api/nuke", async Task<IResult> (HttpRequest request) =>
     }
 
     FileDB.Nuke(UserDB.GetUserFromKey(key.Value));
- 
+
     return Results.Ok();
 });
 
