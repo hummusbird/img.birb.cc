@@ -508,9 +508,9 @@ public static class FileDB
 
     public static void Nuke(User user)
     {
-        List<Img> temp = new List<Img>(db);
+        List<Img> images = new List<Img>(db);
 
-        foreach (Img img in temp)
+        foreach (Img img in images)
         {
             if (img.UID == user.UID)
             {
@@ -620,7 +620,7 @@ public class UsrDTO // used for /api/usr
     public bool ShowURL { get; set; }
 }
 
-public class DashDTO // userd for /api/dashmsg
+public class DashDTO // used for /api/dashmsg
 {
     public string? Username { get; set; }
     public string? DashMsg { get; set; }
@@ -663,7 +663,7 @@ public static class UserDB
                 ShowURL = true,
                 Domain = "img.birb.cc"
             };
-            Console.WriteLine("API-KEY: " + apikey + " \nKeep this safe");
+            Console.WriteLine("API-KEY: " + apikey + "\nKeep this safe!");
             AddUser(newUser);
         }
     }
