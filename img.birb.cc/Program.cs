@@ -652,6 +652,7 @@ public static class UserDB
                 UID = 0,
                 UploadCount = 0,
                 APIKey = Hashing.HashString(apikey),
+                DashMsg = "literally sharex compatible",
                 ShowURL = true,
                 Domain = "img.birb.cc"
             };
