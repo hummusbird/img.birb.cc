@@ -6,9 +6,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Extensions.FileProviders;
 
 // TODO:
-// remove useless if statements
 // actually check fileheaders
-// serve html + css from the host
 // check foreach loops and use dict instead maybe possibly idk
 // hostname loaded from file
 // admin panel
@@ -39,12 +37,9 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 
 app.UseHttpsRedirection();
 
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(
-           Path.Combine(builder.Environment.ContentRootPath, "img")),
-    RequestPath = ""
-});
+app.UseDefaultFiles();
+
+app.UseStaticFiles();
 
 app.MapPost("/api/img", async Task<IResult> (HttpRequest request) =>
 {
@@ -61,21 +56,36 @@ app.MapPost("/api/img", async Task<IResult> (HttpRequest request) =>
         return Results.Unauthorized();
     }
 
-    else
+    List<Img> temp = new List<Img>();
+    User user = UserDB.GetUserFromKey(key.Value);
+
+    foreach (var img in FileDB.GetDB())
     {
-        List<Img> temp = new List<Img>();
-        User user = UserDB.GetUserFromKey(key.Value);
-
-        foreach (var img in FileDB.GetDB())
+        if (img.UID == user.UID)
         {
-            if (img.UID == user.UID)
-            {
-                temp.Add(img);
-            }
+            temp.Add(img);
         }
-
-        return Results.Ok(temp);
     }
+
+    return Results.Ok(temp);
+});
+
+app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) =>
+{
+    if (!request.HasFormContentType)
+    {
+        return Results.BadRequest();
+    }
+
+    var form = await request.ReadFormAsync();
+    var key = form.ToList().Find(key => key.Key == "api_key");
+
+    if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null) // invalid key
+    {
+        return Results.Unauthorized();
+    }
+
+    return Results.Ok(UserDB.GetDB().Find(uid => uid.UID == UserDB.GetUserFromKey(key.Value).UID)!.UsrToDTO());
 });
 
 app.MapPost("/api/usr/new", async Task<IResult> (HttpRequest request) =>
@@ -212,24 +222,6 @@ app.MapPost("/api/users", async Task<IResult> (HttpRequest request) =>
     return Results.Ok(UserDB.GetDB().Select(x => x.UsersToDTO()).ToList());
 });
 
-app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) =>
-{
-    if (!request.HasFormContentType)
-    {
-        return Results.BadRequest();
-    }
-
-    var form = await request.ReadFormAsync();
-    var key = form.ToList().Find(key => key.Key == "api_key");
-
-    if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null) // invalid key
-    {
-        return Results.Unauthorized();
-    }
-
-    return Results.Ok(UserDB.GetDB().Find(uid => uid.UID == UserDB.GetUserFromKey(key.Value).UID)!.UsrToDTO());
-});
-
 app.MapGet("/api/dashmsg", () =>
 {
     List<DashDTO> usrlist = new List<DashDTO>();
@@ -249,7 +241,7 @@ app.MapGet("/api/stats", async () =>
     Stats stats = new Stats();
     stats.Files = FileDB.GetDB().Count;
     stats.Users = UserDB.GetDB().Count;
-    DirectoryInfo dirInfo = new DirectoryInfo(@"img/");
+    DirectoryInfo dirInfo = new DirectoryInfo(@"wwwroot/");
     stats.Bytes = await Task.Run(() => dirInfo.EnumerateFiles("*", SearchOption.TopDirectoryOnly).Sum(file => file.Length));
     stats.Newest = FileDB.GetDB().Last().Timestamp;
 
@@ -298,7 +290,7 @@ app.MapPost("/api/upload", async (http) =>
 
     newFile.NewImg(user.UID, extension, img);
 
-    using (var stream = System.IO.File.Create("img/" + newFile.Filename))
+    using (var stream = System.IO.File.Create("wwwroot/" + newFile.Filename))
     {
         await img.CopyToAsync(stream);
     }
@@ -502,7 +494,7 @@ public static class FileDB
         db.Remove(file);
         Save();
 
-        File.Delete("img/" + file.Filename);
+        File.Delete("wwwroot/" + file.Filename);
         Console.WriteLine("Removed file " + file.Filename);
     }
 
@@ -515,7 +507,7 @@ public static class FileDB
             if (img.UID == user.UID)
             {
                 db.Remove(img);
-                File.Delete("img/" + img.Filename);
+                File.Delete("wwwroot/" + img.Filename);
             }
         }
         Console.WriteLine($"nuked {user.Username}");
