@@ -7,6 +7,8 @@ using Microsoft.Extensions.FileProviders;
 
 // TODO:
 // actually check fileheaders
+// fix salt for windows platforms
+// make a release
 // check foreach loops and use dict instead maybe possibly idk
 // hostname loaded from file
 // admin panel
