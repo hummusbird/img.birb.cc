@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Http.Features;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.FileProviders;
 
 // TODO:
 // actually check fileheaders
@@ -11,8 +10,11 @@ using Microsoft.Extensions.FileProviders;
 // make a release
 // check foreach loops and use dict instead maybe possibly idk
 // hostname loaded from file
+// log file?
 // admin panel
 // key rotation
+
+string[] fileTypes = { ".jpg", ".jpeg", ".png", ".gif", ".mp4", ".mp3", ".wav" };
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -28,8 +30,6 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
-
-string[] fileTypes = { ".jpg", ".jpeg", ".png", ".gif", ".mp4", ".mp3", ".wav" };
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
