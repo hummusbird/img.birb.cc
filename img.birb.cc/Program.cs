@@ -29,7 +29,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-
 string[] fileTypes = { ".jpg", ".jpeg", ".png", ".gif", ".mp4", ".mp3", ".wav" };
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions
@@ -554,7 +553,7 @@ public class User
     public int UploadCount { get; set; } = 0;
     public long UploadedBytes { get; set; } = 0;
     public string? APIKey { get; set; }
-    public string? Domain { get; set; } = "img.birb.cc";
+    public string Domain { get; set; } = "img.birb.cc";
     public string? DashMsg { get; set; }
     public bool ShowURL { get; set; }
 
@@ -609,7 +608,7 @@ public class UsrDTO // used for /api/usr
     public int UID { get; set; }
     public int UploadCount { get; set; } = 0;
     public long UploadedBytes { get; set; } = 0;
-    public string? Domain { get; set; } = "img.birb.cc";
+    public string Domain { get; set; } = "img.birb.cc";
     public string? DashMsg { get; set; }
     public bool ShowURL { get; set; }
 }
