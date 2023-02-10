@@ -57,18 +57,18 @@ app.MapPost("/api/img", async Task<IResult> (HttpRequest request) =>
         return Results.Unauthorized();
     }
 
-    List<Img> temp = new List<Img>();
+    List<Img> images = new List<Img>();
     User user = UserDB.GetUserFromKey(key.Value);
 
     foreach (var img in FileDB.GetDB())
     {
         if (img.UID == user.UID)
         {
-            temp.Add(img);
+            images.Add(img);
         }
     }
 
-    return Results.Ok(temp);
+    return Results.Ok(images);
 });
 
 app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) =>
