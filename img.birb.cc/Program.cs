@@ -6,10 +6,8 @@ using System.Text.RegularExpressions;
 
 // TODO:
 
-// make B64 hash generation from ascii values
-// change user object to have correct access levels (and deserialize properly)
+// make stats filesize counter ignore .html, .js, .css and favicon.png
 // actually check fileheaders
-// move objects to different files (cleanup)
 // fix salt for windows platforms
 // make a release
 // check foreach loops and use dict instead maybe possibly idk
@@ -239,7 +237,8 @@ app.MapGet("/api/stats", async () =>
     stats.Users = UserDB.GetDB().Count;
     DirectoryInfo dirInfo = new DirectoryInfo(@"wwwroot/");
     stats.Bytes = await Task.Run(() => dirInfo.EnumerateFiles("*", SearchOption.TopDirectoryOnly).Sum(file => file.Length));
-    stats.Newest = FileDB.GetDB().Last().Timestamp;
+
+    if (FileDB.GetDB().Count > 0) { stats.Newest = FileDB.GetDB().Last().Timestamp; }
 
     return Results.Ok(stats);
 });
