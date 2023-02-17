@@ -5,7 +5,11 @@ using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
 // TODO:
+
+// make B64 hash generation from ascii values
+// change user object to have correct access levels (and deserialize properly)
 // actually check fileheaders
+// move objects to different files (cleanup)
 // fix salt for windows platforms
 // make a release
 // check foreach loops and use dict instead maybe possibly idk
@@ -13,6 +17,7 @@ using System.Text.RegularExpressions;
 // log file?
 // admin panel
 // key rotation
+// comments
 
 string[] fileTypes = { ".jpg", ".jpeg", ".png", ".gif", ".mp4", ".mp3", ".wav" };
 
@@ -215,7 +220,7 @@ app.MapPost("/api/users", async Task<IResult> (HttpRequest request) =>
         return Results.Unauthorized();
     }
 
-    if (UserDB.GetUserFromKey(key.Value).IsAdmin)
+    if (UserDB.GetUserFromKey(key.Value).IsAdmin) // return private info for admins
     {
         return Results.Ok(UserDB.GetDB().Select(x => x.UsrToDTO()).ToList());
     }
@@ -223,7 +228,7 @@ app.MapPost("/api/users", async Task<IResult> (HttpRequest request) =>
     return Results.Ok(UserDB.GetDB().Select(x => x.UsersToDTO()).ToList());
 });
 
-app.MapGet("/api/dashmsg", () =>
+app.MapGet("/api/dashmsg", () => // get one random username + dashmsg 
 {
     List<DashDTO> usrlist = new List<DashDTO>();
     foreach (User user in UserDB.GetDB())
@@ -547,17 +552,20 @@ public class Img
 
 public class User
 {
-    public bool IsAdmin { get; set; }
+    // public
     public string? Username { get; set; }
     public int UID { get; set; }
-    public int UploadCount { get; set; } = 0;
     public long UploadedBytes { get; set; } = 0;
+    public int UploadCount { get; set; } = 0;
+
+    // private
+    public bool IsAdmin { get; set; }
     public string? APIKey { get; set; }
     public string Domain { get; set; } = "img.birb.cc";
     public string? DashMsg { get; set; }
     public bool ShowURL { get; set; }
 
-    public UsersDTO UsersToDTO()
+    public UsersDTO UsersToDTO() // public user info
     {
         return new UsersDTO
         {
@@ -568,15 +576,16 @@ public class User
         };
     }
 
-    public UsrDTO UsrToDTO()
+    public UsrDTO UsrToDTO() // private user info
     {
         return new UsrDTO
         {
-            IsAdmin = this.IsAdmin,
             Username = this.Username,
             UID = this.UID,
-            UploadCount = this.UploadCount,
             UploadedBytes = this.UploadedBytes,
+            UploadCount = this.UploadCount,
+
+            IsAdmin = this.IsAdmin,
             Domain = this.Domain,
             DashMsg = this.DashMsg,
             ShowURL = this.ShowURL
@@ -591,6 +600,11 @@ public class User
             DashMsg = this.DashMsg
         };
     }
+
+    public bool KeyMatches(string input)
+    {
+        return APIKey == input;
+    }
 }
 
 public class UsersDTO // used for /api/users
@@ -603,11 +617,12 @@ public class UsersDTO // used for /api/users
 
 public class UsrDTO // used for /api/usr
 {
-    public bool IsAdmin { get; set; }
     public string? Username { get; set; }
     public int UID { get; set; }
-    public int UploadCount { get; set; } = 0;
     public long UploadedBytes { get; set; } = 0;
+    public int UploadCount { get; set; } = 0;
+
+    public bool IsAdmin { get; set; }
     public string Domain { get; set; } = "img.birb.cc";
     public string? DashMsg { get; set; }
     public bool ShowURL { get; set; }
@@ -651,11 +666,8 @@ public static class UserDB
                 Username = "Admin",
                 IsAdmin = true,
                 UID = 0,
-                UploadCount = 0,
                 APIKey = Hashing.HashString(apikey),
                 DashMsg = "literally sharex compatible",
-                ShowURL = true,
-                Domain = "img.birb.cc"
             };
             Console.WriteLine("API-KEY: " + apikey + "\nKeep this safe!");
             AddUser(newUser);
@@ -701,6 +713,6 @@ public static class UserDB
 
     public static User GetUserFromKey(string key)
     {
-        return db.Find(user => user.APIKey == Hashing.HashString(key));
+        return db.Find(user => user.KeyMatches(Hashing.HashString(key)));
     }
 }
