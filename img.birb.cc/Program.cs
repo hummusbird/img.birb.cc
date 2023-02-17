@@ -8,7 +8,6 @@ using System.Text.RegularExpressions;
 
 // make stats filesize counter ignore .html, .js, .css and favicon.png
 // actually check fileheaders
-// fix salt for windows platforms
 // make a release
 // check foreach loops and use dict instead maybe possibly idk
 // hostname loaded from file
@@ -368,7 +367,7 @@ public static class Hashing
         {
             using (StreamReader SR = new StreamReader("salt.txt"))
             {
-                salt = SR.ReadToEnd();
+                salt = SR.ReadToEnd().Trim();
             }
             Console.WriteLine($"Loaded salt");
         }
