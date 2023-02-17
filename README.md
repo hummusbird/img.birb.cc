@@ -1,16 +1,18 @@
 # img.birb.cc
 
-img.birb.cc is a ShareX compatible C# image host, privately hosted by me.
+img.birb.cc is a ShareX compatible C# image host, privately hosted by me
 
-no, you cannot have an API key.
+no, you cannot have an API key
 
 ## how to host yourself
 
-- clone the repo.
+- clone the repo
 
-- run `dotnet run`
+- build using `build.sh` for linux, or `build.bat` for windows
 
-- a default admin api key will be generated. Use this to add new accounts.
+- run the executable alongside the `wwwroot` folder
+
+- a default admin api key will be generated for you - use this to add new accounts from the admin page
 
 ## valid endpoints
 
