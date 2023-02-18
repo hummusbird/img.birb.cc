@@ -246,7 +246,6 @@ app.MapPost("/api/upload", async (http) =>
 {
     http.Features.Get<IHttpMaxRequestBodySizeFeature>()!.MaxRequestBodySize = null; // removes max filesize (set max in NGINX, not here)
 
-
     if (!http.Request.HasFormContentType)
     {
         http.Response.StatusCode = 400;
