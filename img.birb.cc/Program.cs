@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Microsoft.AspNetCore.HttpOverrides;
+﻿using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Http.Features;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
@@ -7,16 +6,15 @@ using System.Text.RegularExpressions;
 // TODO:
 
 // make stats filesize counter ignore .html, .js, .css and favicon.png
-// actually check fileheaders
 // make a release
 // check foreach loops and use dict instead maybe possibly idk
 // hostname loaded from file
+// config
 // log file?
 // admin panel
 // key rotation
+// invite gen
 // comments
-
-string[] fileTypes = { ".jpg", ".jpeg", ".png", ".gif", ".mp4", ".mp3", ".wav" };
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -272,10 +270,17 @@ app.MapPost("/api/upload", async (http) =>
 
     string extension = Path.GetExtension(img.FileName);
 
-    if (extension is null || extension.Length == 0 || !fileTypes.Contains(extension) && !UserDB.GetUserFromKey(key.Value).IsAdmin) // invalid extension
+    if (UserDB.GetUserFromKey(key.Value).IsAdmin == false) // only check magic bytes for non-admins
     {
-        http.Response.StatusCode = 400;
-        return;
+        Stream? stream = new MemoryStream();
+        await img.CopyToAsync(stream!);
+
+        if (!Hashing.HasAllowedMagicBytes(stream!))
+        {
+            http.Response.StatusCode = 400;
+            Console.WriteLine("illegal filetype");
+            return;
+        }
     }
 
     Img newFile = new Img();
@@ -348,6 +353,7 @@ app.MapDelete("/api/nuke", async Task<IResult> (HttpRequest request) =>
 });
 
 Hashing.LoadSalt();
+Hashing.LoadAllowedFileTypes();
 FileDB.Load();
 UserDB.Load();
 
@@ -359,6 +365,8 @@ public static class Hashing
 {
     public static Random rand = new Random();
     private static string? salt;
+
+    private static List<String> fileTypes = new List<string>(); //{ ".jpg", ".jpeg", ".png", ".gif", ".mp4", ".mp3", ".webm", ".mkv" };
 
     public static void LoadSalt()
     {
@@ -386,6 +394,20 @@ public static class Hashing
         }
     }
 
+    public static void LoadAllowedFileTypes()
+    {
+        fileTypes.Add("89504E470D0A1A0A");       // png
+        fileTypes.Add("FFD8FF");                 // jpg
+        fileTypes.Add("474946383761");           // gif
+        fileTypes.Add("474946383961");           // gif
+        fileTypes.Add("6674797069736F6D");       // mp4
+        fileTypes.Add("FFFB");                   // mp3
+        fileTypes.Add("FFF3");                   // mp3
+        fileTypes.Add("FFF2");                   // mp3
+        fileTypes.Add("494433");                 // mp3
+        fileTypes.Add("1A45DFA3");               // webm & mkv+
+    }
+
     public static string HashString(string input) // yes, i know the use of "hash" is very inconsistent. shut up.
     {
         byte[] hash;
@@ -407,5 +429,28 @@ public static class Hashing
         }
 
         return hash;
+    }
+
+    public static bool HasAllowedMagicBytes(Stream stream)
+    {
+        if (stream.Length < 16) { return false; }
+
+        string magicbytes = "";
+        stream.Position = 0;
+
+        for (int i = 0; i < 8; i++) // load first 8 bytes from file
+        {
+            magicbytes += (stream.ReadByte().ToString("X2")); // convert from int to hex
+        }
+
+        foreach (string allowedMagicBytes in fileTypes)
+        {
+            if (magicbytes.StartsWith(allowedMagicBytes)) // compare to list of allowed filetypes
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
