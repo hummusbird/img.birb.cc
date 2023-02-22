@@ -15,8 +15,8 @@ using System.Text.RegularExpressions;
 // invite gen
 // comments
 
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
-var builder = WebApplication.CreateBuilder(args);
+string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
@@ -27,7 +27,7 @@ builder.Services.AddCors(options =>
         });
 });
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
@@ -277,7 +277,7 @@ app.MapPost("/api/upload", async (http) =>
         Stream? stream = new MemoryStream();
         await img.CopyToAsync(stream!);
 
-        if (!Hashing.HasAllowedMagicBytes(stream!))
+        if (!Config.HasAllowedMagicBytes(stream!))
         {
             http.Response.StatusCode = 400;
             Console.WriteLine("illegal filetype");
@@ -352,8 +352,7 @@ app.MapDelete("/api/nuke", async Task<IResult> (HttpRequest request) =>
     return Results.Ok();
 });
 
-Hashing.LoadSalt();
-Hashing.LoadAllowedFileTypes();
+Config.Load();
 FileDB.Load();
 UserDB.Load();
 
@@ -392,20 +391,6 @@ public static class Hashing
         }
     }
 
-    public static void LoadAllowedFileTypes()
-    {
-        fileTypes.Add("89504E470D0A1A0A");       // png
-        fileTypes.Add("FFD8FF");                 // jpg
-        fileTypes.Add("474946383761");           // gif
-        fileTypes.Add("474946383961");           // gif
-        fileTypes.Add("6674797069736F6D");       // mp4
-        fileTypes.Add("FFFB");                   // mp3
-        fileTypes.Add("FFF3");                   // mp3
-        fileTypes.Add("FFF2");                   // mp3
-        fileTypes.Add("494433");                 // mp3
-        fileTypes.Add("1A45DFA3");               // webm & mkv+
-    }
-
     public static string HashString(string input) // yes, i know the use of "hash" is very inconsistent. shut up.
     {
         byte[] hash;
@@ -427,28 +412,5 @@ public static class Hashing
         }
 
         return hash;
-    }
-
-    public static bool HasAllowedMagicBytes(Stream stream)
-    {
-        if (stream.Length < 16) { return false; }
-
-        string magicbytes = "";
-        stream.Position = 0;
-
-        for (int i = 0; i < 8; i++) // load first 8 bytes from file
-        {
-            magicbytes += (stream.ReadByte().ToString("X2")); // convert from int to hex
-        }
-
-        foreach (string allowedMagicBytes in fileTypes)
-        {
-            if (magicbytes.StartsWith(allowedMagicBytes)) // compare to list of allowed filetypes
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 }
