@@ -9,7 +9,7 @@ public class User
     public int UploadCount = 0;
 
     // private
-    public bool IsAdmin { get; set; }
+    public bool IsAdmin { get; init; }
     [JsonProperty] public string? APIKey { private get; init; }
     public string Domain = "img.birb.cc";
     public string? DashMsg;
@@ -89,6 +89,8 @@ public static class UserDB
     private readonly static string path = "user.json";
     private static List<User> db = new List<User>();
 
+    public static List<User> GetDB() { return db; }
+
     public static void Load()
     {
         try
@@ -100,14 +102,14 @@ public static class UserDB
                 db = JsonConvert.DeserializeObject<List<User>>(json)!;
                 Save();
             }
-            Console.WriteLine($"Loaded DB of length {db!.Count}");
+            Console.WriteLine($"Loaded DB of length {db.Count}");
         }
         catch
         {
             Console.WriteLine($"Unable to load {path}");
         }
 
-        if (!File.Exists(path) || db!.Count == 0) // Generate default admin account
+        if (!File.Exists(path) || db.Count == 0) // Generate default admin account
         {
             string apikey = Hashing.NewHash(40);
             Console.WriteLine("Generated default Admin account");
@@ -147,8 +149,6 @@ public static class UserDB
         db.Add(user);
         Save();
     }
-
-    public static List<User> GetDB() { return db; }
 
     public static User GetUserFromUsername(string username)
     {

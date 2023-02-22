@@ -13,24 +13,7 @@ public static class FileDB
     private readonly static string path = "img.json";
     private static List<Img> db = new List<Img>();
 
-    public static List<Img> GetDB()
-    {
-        return db;
-    }
-
-    public static Img Find(string hash)
-    {
-        return db.Find(file => file.Hash == hash);
-    }
-
-    public static void Add(Img file)
-    {
-        if (Find(file.Hash!) is null)
-        {
-            db.Add(file);
-            Save();
-        }
-    }
+    public static List<Img> GetDB() { return db; }
 
     public static void Load()
     {
@@ -69,6 +52,20 @@ public static class FileDB
         catch
         {
             Console.WriteLine($"Error saving {path}!");
+        }
+    }
+
+    public static Img Find(string hash)
+    {
+        return db.Find(file => file.Hash == hash);
+    }
+
+    public static void Add(Img file)
+    {
+        if (Find(file.Hash!) is null)
+        {
+            db.Add(file);
+            Save();
         }
     }
 
