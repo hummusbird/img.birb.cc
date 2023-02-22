@@ -286,7 +286,7 @@ app.MapPost("/api/upload", async (http) =>
     }
 
     User user = UserDB.GetUserFromKey(key.Value);
-    Img newFile = new Img(user.UID, extension, img);
+    Img newFile = new Img().NewImg(user.UID, extension, img);
 
     using (var stream = System.IO.File.Create("wwwroot/" + newFile.Filename))
     {

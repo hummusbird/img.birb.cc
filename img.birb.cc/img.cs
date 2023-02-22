@@ -1,5 +1,34 @@
 using Newtonsoft.Json;
 
+public class Img
+{
+    public string? Hash { get; set; }
+    public string? Filename { get; set; }
+    public int UID { get; set; }
+    public DateTime Timestamp { get; set; }
+
+    internal Img NewImg(int uid, string extension, IFormFile img)
+    {
+        string newHash = Hashing.NewHash(8);
+        while (FileDB.Find(newHash) is not null)
+        {
+            newHash = Hashing.NewHash(8);
+        }
+
+        Hash = newHash;
+        Filename = Hash + extension;
+        UID = uid;
+        Timestamp = DateTime.Now;
+
+        UserDB.GetUserFromUID(uid).UploadCount++;
+        UserDB.GetUserFromUID(uid).UploadedBytes += img.Length;
+        UserDB.Save();
+
+        FileDB.Add(this);
+        return (this);
+    }
+}
+
 public class Stats
 {
     public long Bytes { get; set; }
@@ -92,33 +121,5 @@ public static class FileDB
         }
         Console.WriteLine($"nuked {user.Username}");
         Save();
-    }
-}
-
-public class Img
-{
-    public string? Hash { get; set; }
-    public string? Filename { get; set; }
-    public int UID { get; set; }
-    public DateTime Timestamp { get; set; }
-
-    internal Img(int uid, string extension, IFormFile img)
-    {
-        string newHash = Hashing.NewHash(8);
-        while (FileDB.Find(newHash) is not null)
-        {
-            newHash = Hashing.NewHash(8);
-        }
-
-        Hash = newHash;
-        Filename = Hash + extension;
-        UID = uid;
-        Timestamp = DateTime.Now;
-
-        UserDB.GetUserFromUID(uid).UploadCount++;
-        UserDB.GetUserFromUID(uid).UploadedBytes += img.Length;
-        UserDB.Save();
-
-        FileDB.Add(this);
     }
 }
