@@ -11,7 +11,7 @@ public class User
     // private
     public bool IsAdmin { get; init; }
     [JsonProperty] public string? APIKey { private get; init; }
-    public string Domain = Config.DefaultURL!;
+    public string Domain = Config.DefaultDomain!;
     public string? DashMsg;
     public bool ShowURL;
 
@@ -73,7 +73,7 @@ public class UsrDTO // used for /api/usr
     public int UploadCount { get; set; } = 0;
 
     public bool IsAdmin { get; set; }
-    public string Domain { get; set; } = Config.DefaultURL!;
+    public string Domain { get; set; } = Config.DefaultDomain!;
     public string? DashMsg { get; set; }
     public bool ShowURL { get; set; }
 }

@@ -6,13 +6,32 @@ no, you cannot have an API key
 
 ## how to host yourself
 
-- clone the repo
-
-- build using `build.sh` for linux, or `build.bat` for windows
+- download the latest release
 
 - run the executable alongside the `wwwroot` folder
 
 - a default admin api key will be generated for you - use this to add new accounts from the admin page
+
+you may also build the program yourself using `build.sh` or `build.bat`
+
+## config file
+
+the first time you run the program, a `config.json` file is generated
+
+this file contains settings and preferences for your image host:
+
+```
+DefaultDomain: set this to the default domain of your website 
+
+UserDBPath: path to user json file
+
+FileDBPath: path to file json file
+
+LoggingEnabled: disables / enables logging
+
+AllowedFileTypes: an array of magic headers for allowed filetypes. 
+see https://en.wikipedia.org/wiki/List_of_file_signatures
+```
 
 ## valid endpoints
 

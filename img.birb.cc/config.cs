@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 public class Settings
 {
-    public string? DefaultURL;
+    public string? DefaultDomain;
     public string? UserDBPath;
     public string? FileDBPath;
     public bool LoggingEnabled;
@@ -14,7 +14,7 @@ public static class Config
 {
     private const string path = "config.json";
 
-    public static string? DefaultURL { get; private set; } = "img.birb.cc";
+    public static string? DefaultDomain { get; private set; } = "img.birb.cc";
     public static string? UserDBPath { get; private set; } = "user.json";
     public static string? FileDBPath { get; private set; } = "img.json";
     public static bool LoggingEnabled { get; private set; } = false;
@@ -42,7 +42,7 @@ public static class Config
 
                 Settings? config = JsonConvert.DeserializeObject<Settings>(json);
 
-                DefaultURL = config!.DefaultURL;
+                DefaultDomain = config!.DefaultDomain;
                 UserDBPath = config!.UserDBPath;
                 FileDBPath = config!.FileDBPath;
                 LoggingEnabled = config.LoggingEnabled;
@@ -67,7 +67,7 @@ public static class Config
     {
         Settings? config = new Settings();
 
-        config.DefaultURL = DefaultURL;
+        config.DefaultDomain = DefaultDomain;
         config.UserDBPath = UserDBPath;
         config.FileDBPath = FileDBPath;
         config.LoggingEnabled = LoggingEnabled;
