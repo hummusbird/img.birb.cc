@@ -45,9 +45,9 @@ public static class FileDB
             }
             Console.WriteLine($"Loaded DB of length {db.Count}");
         }
-        catch
+        catch (Exception e)
         {
-            Console.WriteLine($"Unable to load {path}");
+            Console.WriteLine(e);//$"Unable to load {path}");
         }
 
         if (!File.Exists(path))
@@ -103,10 +103,9 @@ public class Img
     public string? Hash { get; set; }
     public string? Filename { get; set; }
     public int UID { get; set; }
-
     public DateTime Timestamp { get; set; }
 
-    public void NewImg(int uid, string extension, IFormFile img)
+    internal Img(int uid, string extension, IFormFile img)
     {
         string newHash = Hashing.NewHash(8);
         while (FileDB.Find(newHash) is not null)
@@ -114,10 +113,10 @@ public class Img
             newHash = Hashing.NewHash(8);
         }
 
-        this.Hash = newHash;
-        this.Filename = this.Hash + extension;
-        this.UID = uid;
-        this.Timestamp = DateTime.Now;
+        Hash = newHash;
+        Filename = Hash + extension;
+        UID = uid;
+        Timestamp = DateTime.Now;
 
         UserDB.GetUserFromUID(uid).UploadCount++;
         UserDB.GetUserFromUID(uid).UploadedBytes += img.Length;
