@@ -136,7 +136,12 @@ app.MapPost("/api/usr/new", async Task<IResult> (HttpRequest request) =>
         NewKey = Hashing.NewHash(40);
     }
 
-    User newUser = new(NewUsername, NewUID, Hashing.HashString(NewKey));
+    User newUser = new User
+    {
+        Username = NewUsername,
+        UID = NewUID,
+        APIKey = Hashing.HashString(NewKey),
+    };
     UserDB.AddUser(newUser);
 
     return Results.Text(NewUsername + ": " + NewKey);

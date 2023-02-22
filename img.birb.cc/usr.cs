@@ -3,32 +3,17 @@ using Newtonsoft.Json;
 public class User
 {
     // public
-    public readonly string? Username;
-    public readonly int UID;
-    public long UploadedBytes { get; set; } = 0;
-    public int UploadCount { get; set; } = 0;
+    public string? Username { get; init; }
+    public int UID { get; init; }
+    public long UploadedBytes = 0;
+    public int UploadCount = 0;
 
     // private
-    public bool IsAdmin { get; }
-    public string? APIKey { get; private set; }
-    public string Domain { get; set; } = "img.birb.cc";
-    public string? DashMsg { get; set; }
-    public bool ShowURL { get; set; }
-
-    public User(string username, int uid, string apikey, bool isadmin = false, string? dashmsg = null, long uploadedbytes = 0, int uploadcount = 0, string domain = "img.birb.cc", bool showurl = true)
-    {
-        Username = username;
-        UID = uid;
-        APIKey = apikey;
-        IsAdmin = isadmin;
-        DashMsg = dashmsg;
-
-        // used for deserialization
-        UploadedBytes = uploadedbytes;
-        UploadCount = uploadcount;
-        Domain = domain;
-        ShowURL = showurl;
-    }
+    public bool IsAdmin { get; set; }
+    [JsonProperty] public string? APIKey { private get; init; }
+    public string Domain = "img.birb.cc";
+    public string? DashMsg;
+    public bool ShowURL;
 
     public UsersDTO UsersToDTO() // public user info
     {
@@ -127,7 +112,14 @@ public static class UserDB
             string apikey = Hashing.NewHash(40);
             Console.WriteLine("Generated default Admin account");
 
-            User newUser = new User("Admin", 0, Hashing.HashString(apikey), true, "literally sharex compatible");
+            User newUser = new User
+            {
+                Username = "Admin",
+                UID = 0,
+                APIKey = Hashing.HashString(apikey),
+                IsAdmin = true,
+                DashMsg = "literally sharex compatible"
+            };
 
             Console.WriteLine("API-KEY: " + apikey + "\nKeep this safe!");
             AddUser(newUser);
