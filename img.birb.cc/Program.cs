@@ -8,7 +8,6 @@ using System.Text.RegularExpressions;
 // make stats filesize counter ignore .html, .js, .css and favicon.png
 // make a release
 // check foreach loops and use dict instead maybe possibly idk
-// hostname loaded from file
 // config
 // log file?
 // admin panel
@@ -17,7 +16,6 @@ using System.Text.RegularExpressions;
 // comments
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
@@ -36,11 +34,10 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 });
 
-app.UseHttpsRedirection();
-
-app.UseDefaultFiles();
-
-app.UseStaticFiles();
+app.UseHttpsRedirection();  // redirect to 443
+app.UseDefaultFiles();      // use index.html & index.cs
+app.UseStaticFiles();       // use wwwroot
+app.UseCors(MyAllowSpecificOrigins);
 
 app.MapPost("/api/img", async Task<IResult> (HttpRequest request) =>
 {
@@ -356,8 +353,6 @@ Hashing.LoadSalt();
 Hashing.LoadAllowedFileTypes();
 FileDB.Load();
 UserDB.Load();
-
-app.UseCors(MyAllowSpecificOrigins);
 
 app.Run();
 
