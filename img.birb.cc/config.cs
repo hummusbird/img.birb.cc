@@ -1,5 +1,11 @@
 using Newtonsoft.Json;
 
+// TODO:
+
+// remove settings class
+// deserialise into dict
+// interate through fields and set accordingly
+
 public class Settings
 {
     public string? DefaultDomain;
@@ -8,7 +14,6 @@ public class Settings
     public bool LoggingEnabled;
     public List<String>? AllowedFileTypes;
 }
-
 
 public static class Config
 {
@@ -53,7 +58,6 @@ public static class Config
         catch
         {
             Console.WriteLine($"Unable to load {path}");
-
         }
 
         if (!File.Exists(path))

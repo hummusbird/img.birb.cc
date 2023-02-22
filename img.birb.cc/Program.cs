@@ -34,9 +34,9 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 });
 
-app.UseHttpsRedirection();  // redirect to 443
+app.UseHttpsRedirection();  // redirect 80 to 443
 app.UseDefaultFiles();      // use index.html & index.cs
-app.UseStaticFiles();       // use wwwroot
+app.UseStaticFiles();       // enable static file serving
 app.UseCors(MyAllowSpecificOrigins);
 
 app.MapPost("/api/img", async Task<IResult> (HttpRequest request) =>
