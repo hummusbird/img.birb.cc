@@ -9,13 +9,13 @@ public class Img
 
     internal Img NewImg(int uid, string extension, IFormFile img)
     {
-        string newHash = Hashing.NewHash(8);
-        while (FileDB.Find(newHash) is not null)
+        string NewHash = Hashing.NewHash(8);
+        while (FileDB.Find(NewHash) is not null)
         {
-            newHash = Hashing.NewHash(8);
+            NewHash = Hashing.NewHash(8);
         }
 
-        Hash = newHash;
+        Hash = NewHash;
         Filename = Hash + extension;
         UID = uid;
         Timestamp = DateTime.Now;
