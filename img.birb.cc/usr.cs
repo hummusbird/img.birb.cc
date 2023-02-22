@@ -11,7 +11,7 @@ public class User
     // private
     public bool IsAdmin { get; init; }
     [JsonProperty] public string? APIKey { private get; init; }
-    public string Domain = "img.birb.cc";
+    public string Domain = Config.DefaultURL!;
     public string? DashMsg;
     public bool ShowURL;
 
@@ -73,7 +73,7 @@ public class UsrDTO // used for /api/usr
     public int UploadCount { get; set; } = 0;
 
     public bool IsAdmin { get; set; }
-    public string Domain { get; set; } = "img.birb.cc";
+    public string Domain { get; set; } = Config.DefaultURL!;
     public string? DashMsg { get; set; }
     public bool ShowURL { get; set; }
 }
@@ -86,7 +86,6 @@ public class DashDTO // used for /api/dashmsg
 
 public static class UserDB
 {
-    private readonly static string path = "user.json";
     private static List<User> db = new List<User>();
 
     public static List<User> GetDB() { return db; }
@@ -95,7 +94,7 @@ public static class UserDB
     {
         try
         {
-            using (StreamReader SR = new StreamReader(path))
+            using (StreamReader SR = new StreamReader(Config.UserDBPath!))
             {
                 string json = SR.ReadToEnd();
 
@@ -106,10 +105,10 @@ public static class UserDB
         }
         catch
         {
-            Console.WriteLine($"Unable to load {path}");
+            Console.WriteLine($"Unable to load {Config.UserDBPath!}");
         }
 
-        if (!File.Exists(path) || db.Count == 0) // Generate default admin account
+        if (!File.Exists(Config.UserDBPath!) || db.Count == 0) // Generate default admin account
         {
             string apikey = Hashing.NewHash(40);
             Console.WriteLine("Generated default Admin account");
@@ -132,15 +131,15 @@ public static class UserDB
     {
         try
         {
-            using (StreamWriter SW = new StreamWriter(path, false))
+            using (StreamWriter SW = new StreamWriter(Config.UserDBPath!, false))
             {
                 SW.WriteLine(JsonConvert.SerializeObject(db, Formatting.Indented));
-                Console.WriteLine($"{path} saved!");
+                Console.WriteLine($"{Config.UserDBPath!} saved!");
             }
         }
         catch
         {
-            Console.WriteLine($"Error saving {path}!");
+            Console.WriteLine($"Error saving {Config.UserDBPath!}!");
         }
     }
 

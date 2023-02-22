@@ -39,7 +39,6 @@ public class Stats
 
 public static class FileDB
 {
-    private readonly static string path = "img.json";
     private static List<Img> db = new List<Img>();
 
     public static List<Img> GetDB() { return db; }
@@ -48,7 +47,7 @@ public static class FileDB
     {
         try
         {
-            using (StreamReader SR = new StreamReader(path))
+            using (StreamReader SR = new StreamReader(Config.FileDBPath!))
             {
                 string json = SR.ReadToEnd();
 
@@ -62,7 +61,7 @@ public static class FileDB
             Console.WriteLine(e);//$"Unable to load {path}");
         }
 
-        if (!File.Exists(path))
+        if (!File.Exists(Config.FileDBPath!))
         {
             Save();
         }
@@ -72,15 +71,15 @@ public static class FileDB
     {
         try
         {
-            using (StreamWriter SW = new StreamWriter(path, false))
+            using (StreamWriter SW = new StreamWriter(Config.FileDBPath!, false))
             {
                 SW.WriteLine(JsonConvert.SerializeObject(db, Formatting.Indented));
-                Console.WriteLine($"{path} saved!");
+                Console.WriteLine($"{Config.FileDBPath!} saved!");
             }
         }
         catch
         {
-            Console.WriteLine($"Error saving {path}!");
+            Console.WriteLine($"Error saving {Config.FileDBPath!}!");
         }
     }
 
