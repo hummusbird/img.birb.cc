@@ -11,6 +11,7 @@ public class Settings
     public string? DefaultDomain;
     public string? UserDBPath;
     public string? FileDBPath;
+    public string? LogPath;
     public bool LoggingEnabled;
     public List<String>? AllowedFileTypes;
 }
@@ -22,6 +23,7 @@ public static class Config
     public static string? DefaultDomain { get; private set; } = "img.birb.cc";
     public static string? UserDBPath { get; private set; } = "user.json";
     public static string? FileDBPath { get; private set; } = "img.json";
+    public static string? LogPath { get; private set; } = "logs";
     public static bool LoggingEnabled { get; private set; } = false;
 
     public static List<String>? AllowedFileTypes { get; private set; } = new List<String>() {
@@ -50,20 +52,21 @@ public static class Config
                 DefaultDomain = config!.DefaultDomain;
                 UserDBPath = config!.UserDBPath;
                 FileDBPath = config!.FileDBPath;
+                LogPath = config!.LogPath;
                 LoggingEnabled = config.LoggingEnabled;
                 AllowedFileTypes = config.AllowedFileTypes;
             }
-            Console.WriteLine($"Loaded configuration file");
+            Log.Info($"Loaded configuration file");
         }
         catch
         {
-            Console.WriteLine($"Unable to load {path}");
+            Log.Warning($"Unable to load {path}");
         }
 
         if (!File.Exists(path))
         {
             Save();
-            Console.WriteLine("Generated new configuration file");
+            Log.Info("Generated new configuration file");
         }
     }
 
@@ -74,6 +77,7 @@ public static class Config
         config.DefaultDomain = DefaultDomain;
         config.UserDBPath = UserDBPath;
         config.FileDBPath = FileDBPath;
+        config.LogPath = LogPath;
         config.LoggingEnabled = LoggingEnabled;
         config.AllowedFileTypes = AllowedFileTypes;
 
@@ -87,12 +91,12 @@ public static class Config
             using (StreamWriter SW = new StreamWriter(path, false))
             {
                 SW.WriteLine(JsonConvert.SerializeObject(Serialize(), Formatting.Indented));
-                Console.WriteLine($"{path} saved!");
+                Log.Info($"{path} saved!");
             }
         }
         catch
         {
-            Console.WriteLine($"Error saving {path}!");
+            Log.Critical($"Unable to save {path}!");
         }
     }
 
