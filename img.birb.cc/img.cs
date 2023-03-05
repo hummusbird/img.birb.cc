@@ -56,9 +56,9 @@ public static class FileDB
             }
             Console.WriteLine($"Loaded DB of length {db.Count}");
         }
-        catch (Exception e)
+        catch
         {
-            Console.WriteLine(e);//$"Unable to load {path}");
+            Console.WriteLine("Unable to load {path}");
         }
 
         if (!File.Exists(Config.FileDBPath!))
