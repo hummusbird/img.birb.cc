@@ -212,7 +212,7 @@ app.MapPost("/api/users", async Task<IResult> (HttpRequest request) => // get re
     return Results.Ok(UserDB.GetDB().Select(x => x.UsersToDTO()).ToList());
 });
 
-app.MapGet("/api/dashmsg", () => // get one random username + dashmsg 
+app.MapGet("/api/dashmsg", () => // get one random username + dashmsg
 {
     List<DashDTO> usrlist = new List<DashDTO>();
     foreach (User user in UserDB.GetDB())
