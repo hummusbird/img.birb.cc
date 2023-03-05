@@ -65,7 +65,7 @@ public static partial class Log
             Console.Write($"{level.ToString()}");
             Console.ResetColor();
             Console.Write($"] [{DateTime.Now.ToString("HH:mm:ss")}] ");
-            if (level == LogLevel.CRIT) { Console.Write($"[{new FileInfo(path.ToString()).Name}:{functionName}:{line}] "); }
+            if (level == LogLevel.CRIT || level == LogLevel.DBUG) { Console.Write($"[{new FileInfo(path.ToString()).Name}:{functionName}:{line}] "); }
             Console.WriteLine($"{value}");
 
             if (Config.LoggingEnabled) // write logfiles
