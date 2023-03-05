@@ -36,7 +36,7 @@ app.UseDefaultFiles();      // use index.html & index.cs
 app.UseStaticFiles();       // enable static file serving
 app.UseCors(MyAllowSpecificOrigins);
 
-app.MapPost("/api/img", async Task<IResult> (HttpRequest request) =>
+app.MapPost("/api/img", async Task<IResult> (HttpRequest request) => // get your uploaded files
 {
     if (!request.HasFormContentType)
     {
@@ -65,7 +65,7 @@ app.MapPost("/api/img", async Task<IResult> (HttpRequest request) =>
     return Results.Ok(images);
 });
 
-app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) =>
+app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) => // get your user data
 {
     if (!request.HasFormContentType)
     {
@@ -83,7 +83,7 @@ app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) =>
     return Results.Ok(UserDB.GetDB().Find(uid => uid.UID == UserDB.GetUserFromKey(key.Value).UID)!.UsrToDTO());
 });
 
-app.MapPost("/api/usr/new", async Task<IResult> (HttpRequest request) =>
+app.MapPost("/api/usr/new", async Task<IResult> (HttpRequest request) => // create new user
 {
     if (!request.HasFormContentType)
     {
@@ -144,7 +144,7 @@ app.MapPost("/api/usr/new", async Task<IResult> (HttpRequest request) =>
     return Results.Text(NewUsername + ": " + NewKey);
 });
 
-app.MapPost("/api/usr/settings", async Task<IResult> (HttpRequest request) =>
+app.MapPost("/api/usr/settings", async Task<IResult> (HttpRequest request) => // update user settings
 {
     if (!request.HasFormContentType)
     {
@@ -189,7 +189,7 @@ app.MapPost("/api/usr/settings", async Task<IResult> (HttpRequest request) =>
     return Results.Accepted();
 });
 
-app.MapPost("/api/users", async Task<IResult> (HttpRequest request) =>
+app.MapPost("/api/users", async Task<IResult> (HttpRequest request) => // get registered users
 {
     if (!request.HasFormContentType)
     {
@@ -226,7 +226,7 @@ app.MapGet("/api/dashmsg", () => // get one random username + dashmsg
     return usrlist.Count == 0 ? Results.NoContent() : Results.Ok(usrlist[Hashing.rand.Next(usrlist.Count)]);
 });
 
-app.MapGet("/api/stats", async () =>
+app.MapGet("/api/stats", async () => // get host stats
 {
     Stats stats = new Stats();
     stats.Files = FileDB.GetDB().Count;
@@ -239,7 +239,7 @@ app.MapGet("/api/stats", async () =>
     return Results.Ok(stats);
 });
 
-app.MapPost("/api/upload", async (http) =>
+app.MapPost("/api/upload", async (http) => // upload file
 {
     http.Features.Get<IHttpMaxRequestBodySizeFeature>()!.MaxRequestBodySize = null; // removes max filesize (set max in NGINX, not here)
 
@@ -298,7 +298,7 @@ app.MapPost("/api/upload", async (http) =>
     return;
 });
 
-app.MapDelete("/api/delete/{hash}", async Task<IResult> (HttpRequest request, string hash) =>
+app.MapDelete("/api/delete/{hash}", async Task<IResult> (HttpRequest request, string hash) => // delete specific file
 {
     if (!request.HasFormContentType || string.IsNullOrEmpty(hash))
     {
@@ -329,7 +329,7 @@ app.MapDelete("/api/delete/{hash}", async Task<IResult> (HttpRequest request, st
     return Results.Unauthorized();
 });
 
-app.MapDelete("/api/nuke", async Task<IResult> (HttpRequest request) =>
+app.MapDelete("/api/nuke", async Task<IResult> (HttpRequest request) => // delete all your files
 {
     if (!request.HasFormContentType)
     {
