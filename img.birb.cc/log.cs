@@ -4,7 +4,7 @@ public static partial class Log
 {
     public static readonly TimeSpan MAX_LOG_AGE = new TimeSpan(days: 1, hours: 0, minutes: 0, seconds: 0);
 
-    private static string prefix = $"{DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss")}";
+    private static string prefix = $"{DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss")}"; // log filename prefix
 
     public static Action<string, string>? MessageBoxProvider { get; set; }
     private static Mutex LogMutex = new Mutex();
@@ -69,7 +69,7 @@ public static partial class Log
             if (level == LogLevel.CRIT) { Console.Write($"[{new FileInfo(path.ToString()).Name}:{functionName}:{line}] "); }
             Console.WriteLine($"{value}");
 
-            if (Config.LoggingEnabled)
+            if (Config.LoggingEnabled) // write logfiles
             {
                 using (System.IO.StreamWriter file = new System.IO.StreamWriter($@"{Config.LogPath}/latest.log", append: true)) { file.WriteLine(logMessage); }
                 using (System.IO.StreamWriter file = new System.IO.StreamWriter($@"{Config.LogPath}/{prefix}.log", append: true)) { file.WriteLine(logMessage); }
@@ -79,9 +79,12 @@ public static partial class Log
 
     public static void Initialize()
     {
-        if (!Directory.Exists($@"{Config.LogPath}"))
+        if (!Directory.Exists($@"{Config.LogPath}") && Config.LoggingEnabled) // create log folder
+        {
             Directory.CreateDirectory($@"{Config.LogPath}");
-        if (File.Exists($@"{Config.LogPath}/latest.log"))
+        }
+
+        if (File.Exists($@"{Config.LogPath}/latest.log") && Config.LoggingEnabled) // clear latest.log
         {
             System.IO.File.WriteAllText($@"{Config.LogPath}/latest.log", string.Empty);
         }
@@ -90,7 +93,7 @@ public static partial class Log
         cleanupThread.Start();
     }
 
-    private static void RunLogCleanup()
+    private static void RunLogCleanup() // clear any files older than MAX_LOG_AGE
     {
         foreach (FileInfo file in new DirectoryInfo($@"{Config.LogPath}/").GetFiles())
         {
