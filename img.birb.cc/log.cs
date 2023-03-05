@@ -6,7 +6,6 @@ public static partial class Log
 
     private static string prefix = $"{DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss")}"; // log filename prefix
 
-    public static Action<string, string>? MessageBoxProvider { get; set; }
     private static Mutex LogMutex = new Mutex();
 
     [MethodImpl(MethodImplOptions.NoInlining)]
