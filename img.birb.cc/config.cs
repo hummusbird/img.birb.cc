@@ -56,6 +56,7 @@ public static class Config
                 LoggingEnabled = config.LoggingEnabled;
                 AllowedFileTypes = config.AllowedFileTypes;
             }
+            if (!Config.LoggingEnabled) { Log.Warning("Logging disabled! No logs will be written"); }
             Log.Info($"Loaded configuration file");
         }
         catch

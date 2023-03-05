@@ -69,8 +69,11 @@ public static partial class Log
             if (level == LogLevel.CRIT) { Console.Write($"[{new FileInfo(path.ToString()).Name}:{functionName}:{line}] "); }
             Console.WriteLine($"{value}");
 
-            using (System.IO.StreamWriter file = new System.IO.StreamWriter($@"{Config.LogPath}/latest.log", append: true)) { file.WriteLine(logMessage); }
-            using (System.IO.StreamWriter file = new System.IO.StreamWriter($@"{Config.LogPath}/{prefix}.log", append: true)) { file.WriteLine(logMessage); }
+            if (Config.LoggingEnabled)
+            {
+                using (System.IO.StreamWriter file = new System.IO.StreamWriter($@"{Config.LogPath}/latest.log", append: true)) { file.WriteLine(logMessage); }
+                using (System.IO.StreamWriter file = new System.IO.StreamWriter($@"{Config.LogPath}/{prefix}.log", append: true)) { file.WriteLine(logMessage); }
+            }
         }
     }
 
