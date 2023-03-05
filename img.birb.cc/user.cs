@@ -101,17 +101,17 @@ public static class UserDB
                 db = JsonConvert.DeserializeObject<List<User>>(json)!;
                 Save();
             }
-            Console.WriteLine($"Loaded DB of length {db.Count}");
+            Log.Info($"{Config.UserDBPath} loaded - {db.Count} items");
         }
         catch
         {
-            Console.WriteLine($"Unable to load {Config.UserDBPath!}");
+            Log.Warning($"Unable to load {Config.UserDBPath!}");
         }
 
         if (!File.Exists(Config.UserDBPath!) || db.Count == 0) // Generate default admin account
         {
             string apikey = Hashing.NewHash(40);
-            Console.WriteLine("Generated default Admin account");
+            Log.Info("Generating default Admin account...");
 
             User newUser = new User
             {
@@ -122,7 +122,9 @@ public static class UserDB
                 DashMsg = "literally sharex compatible"
             };
 
-            Console.WriteLine("API-KEY: " + apikey + "\nKeep this safe!");
+            Log.Info("API-KEY:");
+            Console.WriteLine(apikey);
+            Log.Info("Keep this safe!");
             AddUser(newUser);
         }
     }
@@ -134,12 +136,12 @@ public static class UserDB
             using (StreamWriter SW = new StreamWriter(Config.UserDBPath!, false))
             {
                 SW.WriteLine(JsonConvert.SerializeObject(db, Formatting.Indented));
-                Console.WriteLine($"{Config.UserDBPath!} saved!");
+                Log.Info($"{Config.UserDBPath!} saved!");
             }
         }
         catch
         {
-            Console.WriteLine($"Error saving {Config.UserDBPath!}!");
+            Log.Critical($"Unable to save {Config.UserDBPath!}!");
         }
     }
 

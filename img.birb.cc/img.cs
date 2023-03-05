@@ -54,15 +54,16 @@ public static class FileDB
                 db = JsonConvert.DeserializeObject<List<Img>>(json)!;
                 Save();
             }
-            Console.WriteLine($"Loaded DB of length {db.Count}");
+            Log.Info($"{Config.FileDBPath} loaded - {db.Count} items");
         }
         catch
         {
-            Console.WriteLine("Unable to load {path}");
+            Log.Warning($"Unable to load {Config.FileDBPath}!");
         }
 
         if (!File.Exists(Config.FileDBPath!))
         {
+            Log.Info($"Generating {Config.FileDBPath}...");
             Save();
         }
     }
@@ -74,12 +75,12 @@ public static class FileDB
             using (StreamWriter SW = new StreamWriter(Config.FileDBPath!, false))
             {
                 SW.WriteLine(JsonConvert.SerializeObject(db, Formatting.Indented));
-                Console.WriteLine($"{Config.FileDBPath!} saved!");
+                Log.Info($"{Config.FileDBPath!} saved!");
             }
         }
         catch
         {
-            Console.WriteLine($"Error saving {Config.FileDBPath!}!");
+            Log.Critical($"Unable to save {Config.FileDBPath!}!");
         }
     }
 
@@ -103,7 +104,7 @@ public static class FileDB
         Save();
 
         File.Delete("wwwroot/" + file.Filename);
-        Console.WriteLine("Removed file " + file.Filename);
+        Log.Info("Removed file " + file.Filename);
     }
 
     public static void Nuke(User user)
@@ -118,7 +119,7 @@ public static class FileDB
                 File.Delete("wwwroot/" + img.Filename);
             }
         }
-        Console.WriteLine($"nuked {user.Username}");
+        Log.Info($"nuked {user.Username}");
         Save();
     }
 }

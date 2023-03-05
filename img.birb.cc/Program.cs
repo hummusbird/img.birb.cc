@@ -264,7 +264,7 @@ app.MapPost("/api/upload", async (http) =>
 
     if (img is null || img.Length == 0) // no file or no file extention
     {
-        Console.WriteLine("Invalid upload");
+        Log.Warning("Invalid upload");
         http.Response.StatusCode = 400;
         return;
     }
@@ -279,7 +279,7 @@ app.MapPost("/api/upload", async (http) =>
         if (!Config.HasAllowedMagicBytes(stream!))
         {
             http.Response.StatusCode = 400;
-            Console.WriteLine("illegal filetype");
+            Log.Warning("illegal filetype");
             return;
         }
     }
@@ -292,7 +292,7 @@ app.MapPost("/api/upload", async (http) =>
         await img.CopyToAsync(stream);
     }
 
-    Console.WriteLine($"New File: {newFile.Filename}");
+    Log.Info($"New File: {newFile.Filename}");
     string[] domains = user.Domain!.Split("\r\n");
     string domain = domains[Hashing.rand.Next(domains.Length)];
 
@@ -351,6 +351,7 @@ app.MapDelete("/api/nuke", async Task<IResult> (HttpRequest request) =>
     return Results.Ok();
 });
 
+Log.Initialize();
 Config.Load();
 FileDB.Load();
 UserDB.Load();

@@ -13,16 +13,16 @@ public static class Hashing
             {
                 salt = SR.ReadToEnd().Trim();
             }
-            Console.WriteLine($"Loaded salt");
+            Log.Info($"Loaded salt");
         }
         catch
         {
-            Console.WriteLine($"Unable to load salt");
+            Log.Warning($"Unable to load salt");
         }
 
         if (!File.Exists("salt.txt") || string.IsNullOrEmpty(salt))
         {
-            Console.WriteLine("Generating new salt. Keep this safe!!!");
+            Log.Info("Generating new salt. Keep this safe!!!");
             using (StreamWriter SW = new StreamWriter("salt.txt"))
             {
                 salt = NewHash(40);
