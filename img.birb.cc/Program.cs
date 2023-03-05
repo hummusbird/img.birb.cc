@@ -7,8 +7,6 @@ using System.Text.RegularExpressions;
 // make stats filesize counter ignore .html, .js, .css and favicon.png
 // make a release
 // check foreach loops and use dict instead maybe possibly idk
-// config
-// log file?
 // admin panel
 // key rotation
 // invite gen
