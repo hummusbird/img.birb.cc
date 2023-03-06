@@ -38,10 +38,7 @@ app.UseCors(MyAllowSpecificOrigins);
 
 app.MapPost("/api/img", async Task<IResult> (HttpRequest request) => // get your uploaded files
 {
-    if (!request.HasFormContentType)
-    {
-        return Results.BadRequest();
-    }
+    if (!request.HasFormContentType) { return Results.BadRequest(); }
 
     var form = await request.ReadFormAsync();
     var key = form.ToList().Find(key => key.Key == "api_key");
@@ -67,10 +64,7 @@ app.MapPost("/api/img", async Task<IResult> (HttpRequest request) => // get your
 
 app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) => // get your user data
 {
-    if (!request.HasFormContentType)
-    {
-        return Results.BadRequest();
-    }
+    if (!request.HasFormContentType) { return Results.BadRequest(); }
 
     var form = await request.ReadFormAsync();
     var key = form.ToList().Find(key => key.Key == "api_key");
@@ -85,10 +79,7 @@ app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) => // get your
 
 app.MapPost("/api/usr/new", async Task<IResult> (HttpRequest request) => // create new user
 {
-    if (!request.HasFormContentType)
-    {
-        return Results.BadRequest();
-    }
+    if (!request.HasFormContentType) { return Results.BadRequest(); }
 
     var form = await request.ReadFormAsync();
     var key = form.ToList().Find(key => key.Key == "api_key");
@@ -146,10 +137,7 @@ app.MapPost("/api/usr/new", async Task<IResult> (HttpRequest request) => // crea
 
 app.MapPost("/api/usr/settings", async Task<IResult> (HttpRequest request) => // update user settings
 {
-    if (!request.HasFormContentType)
-    {
-        return Results.BadRequest();
-    }
+    if (!request.HasFormContentType) { return Results.BadRequest(); }
 
     var form = await request.ReadFormAsync();
     var key = form.ToList().Find(key => key.Key == "api_key");
@@ -191,10 +179,7 @@ app.MapPost("/api/usr/settings", async Task<IResult> (HttpRequest request) => //
 
 app.MapPost("/api/users", async Task<IResult> (HttpRequest request) => // get registered users
 {
-    if (!request.HasFormContentType)
-    {
-        return Results.BadRequest();
-    }
+    if (!request.HasFormContentType) { return Results.BadRequest(); }
 
     var form = await request.ReadFormAsync();
     var key = form.ToList().Find(key => key.Key == "api_key");
@@ -331,10 +316,7 @@ app.MapDelete("/api/delete/{hash}", async Task<IResult> (HttpRequest request, st
 
 app.MapDelete("/api/nuke", async Task<IResult> (HttpRequest request) => // delete all your files
 {
-    if (!request.HasFormContentType)
-    {
-        return Results.BadRequest();
-    }
+    if (!request.HasFormContentType) { return Results.BadRequest(); }
 
     var form = await request.ReadFormAsync();
     var key = form.ToList().Find(key => key.Key == "api_key");
