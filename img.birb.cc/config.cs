@@ -57,11 +57,12 @@ public static class Config
                 AllowedFileTypes = config.AllowedFileTypes;
             }
             if (!Config.LoggingEnabled) { Log.Warning("Logging disabled! No logs will be written"); }
+            if (AllowedFileTypes!.Count == 0) { Log.Warning("No allowed filetypes specified! All files will be accepted"); }
             Log.Info($"Loaded configuration file");
         }
         catch
         {
-            Log.Warning($"Unable to load {path}");
+            Log.Error($"Unable to load {path}");
         }
 
         if (!File.Exists(path))
@@ -103,7 +104,9 @@ public static class Config
 
     public static bool HasAllowedMagicBytes(Stream stream)
     {
-        if (stream.Length < 16) { return false; }
+        if (AllowedFileTypes!.Count == 0) { return true; } // if no filetypes listed, allow all
+
+        if (stream.Length < 16) { return false; } // if file header too small, reject
 
         string magicbytes = "";
         stream.Position = 0;

@@ -1,8 +1,7 @@
-*.png
-*.mp4
-*.jpeg
-*.jpg
-*.gif
-*.mp3
-*.wav
+*
+!*.html
+!*.js
+!*.css
+!css/
+!js/
 !favicon.png
