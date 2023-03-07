@@ -111,13 +111,10 @@ public static class FileDB
     {
         List<Img> images = new List<Img>(db);
 
-        foreach (Img img in images)
+        foreach (Img img in images.Where(img => img.UID == user.UID))
         {
-            if (img.UID == user.UID)
-            {
-                db.Remove(img);
-                File.Delete("wwwroot/" + img.Filename);
-            }
+            db.Remove(img);
+            File.Delete("wwwroot/" + img.Filename);
         }
         Log.Info($"nuked {user.Username}");
         Save();

@@ -50,7 +50,7 @@ app.MapPost("/api/img", async Task<IResult> (HttpRequest request) => // get your
     List<Img> images = new List<Img>();
     User user = UserDB.GetUserFromKey(key.Value);
 
-    foreach (var img in FileDB.GetDB().Where(img => img.UID == user.UID))
+    foreach (var img in FileDB.GetDB().Where(img => img.UID == user.UID)) // every image which has a matching UID
     {
         images.Add(img);
     }
@@ -101,7 +101,7 @@ app.MapPost("/api/usr/new", async Task<IResult> (HttpRequest request) => // crea
 
     if (string.IsNullOrEmpty(UID.Value) || UID.Key is null)
     {
-        while (UserDB.GetUserFromUID(NewUID) is not null)
+        while (UserDB.GetUserFromUID(NewUID) is not null) // increase UID until a non-taken one is found
         {
             NewUID += 1;
         }

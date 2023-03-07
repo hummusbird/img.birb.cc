@@ -113,12 +113,9 @@ public static class Config
             magicbytes += (stream.ReadByte().ToString("X2")); // convert from int to hex
         }
 
-        foreach (string allowedMagicBytes in AllowedFileTypes!)
-        {
-            if (magicbytes.StartsWith(allowedMagicBytes)) // compare to list of allowed filetypes
-            {
-                return true;
-            }
+        foreach (string allowedMagicBytes in AllowedFileTypes!.Where(allowedMagicBytes => magicbytes.StartsWith(allowedMagicBytes)))
+        { // compare to list of allowed filetypes
+            return true;
         }
 
         return false;
