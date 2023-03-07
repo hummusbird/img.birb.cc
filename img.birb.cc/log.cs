@@ -78,12 +78,14 @@ public static partial class Log
 
     public static void Initialize()
     {
-        if (!Directory.Exists($@"{Config.LogPath}") && Config.LoggingEnabled) // create log folder
+        if (!Config.LoggingEnabled) { return; }
+
+        if (!Directory.Exists($@"{Config.LogPath}")) // create log folder
         {
             Directory.CreateDirectory($@"{Config.LogPath}");
         }
 
-        if (File.Exists($@"{Config.LogPath}/latest.log") && Config.LoggingEnabled) // clear latest.log
+        if (File.Exists($@"{Config.LogPath}/latest.log")) // clear latest.log
         {
             System.IO.File.WriteAllText($@"{Config.LogPath}/latest.log", string.Empty);
         }
