@@ -4,7 +4,6 @@ using System.Text.RegularExpressions;
 
 // TODO:
 
-// make stats filesize counter ignore .html, .js, .css and favicon.png
 // make a release
 // admin panel
 // key rotation
@@ -209,9 +208,12 @@ app.MapGet("/api/stats", async () => // get host stats
     Stats stats = new Stats();
     stats.Files = FileDB.GetDB().Count;
     stats.Users = UserDB.GetDB().Count;
-    DirectoryInfo dirInfo = new DirectoryInfo(@"wwwroot/");
-    stats.Bytes = await Task.Run(() => dirInfo.EnumerateFiles("*", SearchOption.TopDirectoryOnly).Sum(file => file.Length));
 
+    // iterate through every file in wwwroot, ignoring .* and *.html and favicon - then sum filesize.
+    DirectoryInfo dirInfo = new DirectoryInfo(@"wwwroot/");
+    stats.Bytes = await Task.Run(() => dirInfo.EnumerateFiles("*", SearchOption.TopDirectoryOnly).Where(file => file.Extension != ".html" && !file.Name.StartsWith(".") && file.Name != "favicon.png").Sum(file => file.Length));
+
+    // get timestamp of latest uploaded file
     if (FileDB.GetDB().Count > 0) { stats.Newest = FileDB.GetDB().Last().Timestamp; }
 
     return Results.Ok(stats);
