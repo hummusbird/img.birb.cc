@@ -6,7 +6,6 @@ using System.Text.RegularExpressions;
 
 // make stats filesize counter ignore .html, .js, .css and favicon.png
 // make a release
-// check foreach loops and use dict instead maybe possibly idk
 // admin panel
 // key rotation
 // invite gen
@@ -51,12 +50,9 @@ app.MapPost("/api/img", async Task<IResult> (HttpRequest request) => // get your
     List<Img> images = new List<Img>();
     User user = UserDB.GetUserFromKey(key.Value);
 
-    foreach (var img in FileDB.GetDB())
+    foreach (var img in FileDB.GetDB().Where(img => img.UID == user.UID))
     {
-        if (img.UID == user.UID)
-        {
-            images.Add(img);
-        }
+        images.Add(img);
     }
 
     return Results.Ok(images);
@@ -200,12 +196,9 @@ app.MapPost("/api/users", async Task<IResult> (HttpRequest request) => // get re
 app.MapGet("/api/dashmsg", () => // get one random username + dashmsg
 {
     List<DashDTO> usrlist = new List<DashDTO>();
-    foreach (User user in UserDB.GetDB())
+    foreach (User user in UserDB.GetDB().Where(user => !string.IsNullOrEmpty(user.DashMsg)))
     {
-        if (!string.IsNullOrEmpty(user.DashMsg))
-        {
-            usrlist.Add(user.DashToDTO());
-        }
+        usrlist.Add(user.DashToDTO());
     }
 
     return usrlist.Count == 0 ? Results.NoContent() : Results.Ok(usrlist[Hashing.rand.Next(usrlist.Count)]);
