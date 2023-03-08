@@ -78,8 +78,6 @@ public static partial class Log
 
     public static void Initialize()
     {
-        if (!Config.LoggingEnabled) { return; }
-
         if (!Directory.Exists($@"{Config.LogPath}")) // create log folder
         {
             Directory.CreateDirectory($@"{Config.LogPath}");
@@ -96,13 +94,10 @@ public static partial class Log
 
     private static void RunLogCleanup() // clear any files older than MAX_LOG_AGE
     {
-        foreach (FileInfo file in new DirectoryInfo($@"{Config.LogPath}/").GetFiles())
+        foreach (FileInfo file in new DirectoryInfo($@"{Config.LogPath}/").GetFiles().Where(file => file.LastWriteTime < DateTime.Now - MAX_LOG_AGE))
         {
-            if (file.LastWriteTime < DateTime.Now - MAX_LOG_AGE)
-            {
-                Log.Debug($"Deleting old log file {file.Name}");
-                file.Delete();
-            }
+            Log.Warning($"Deleting old log file {file.Name}");
+            file.Delete();
         }
     }
 }
