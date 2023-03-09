@@ -7,6 +7,8 @@ using System.Text.RegularExpressions;
 // make a release
 // admin panel
 // key rotation
+// EXIF strip
+// checksum + multiple file check
 // invite gen
 // comments
 
