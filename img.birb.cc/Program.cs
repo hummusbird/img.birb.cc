@@ -329,6 +329,7 @@ app.MapDelete("/api/nuke", async Task<IResult> (HttpRequest request) => // delet
 });
 
 Log.Initialize();
+Hashing.LoadSalt();
 Config.Load();
 FileDB.Load();
 UserDB.Load();
