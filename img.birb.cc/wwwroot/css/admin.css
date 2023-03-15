@@ -64,3 +64,18 @@ input {
     padding-left: 15px;
     padding-right: 15px;
 }
+
+table,
+th,
+td {
+    border: 1px solid;
+    padding-left: 10px;
+    border-color: rgb(255, 255, 255);
+    border-collapse: collapse;
+}
+
+#table {
+    display: none;
+    width: 100%;
+    margin-bottom: 70px;
+}
