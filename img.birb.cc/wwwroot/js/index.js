@@ -23,12 +23,13 @@ async function dashmsg() {
 }
 
 function numberWithCommas(x) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
 }
 
 function setTitle() {
     document.getElementById("title").innerHTML = "welcome to " + (window.location.host || "img.birb.cc")
     document.getElementById("toptitle").innerHTML = (window.location.host || "img.birb.cc")
+    document.title = (window.location.host || "img.birb.cc")
 }
 
 function changeToSize(x) {

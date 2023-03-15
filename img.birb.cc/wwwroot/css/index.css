@@ -1,3 +1,12 @@
+body {
+    padding-left: 40px;
+    padding-right: 40px;
+    background-color: black;
+    color: white;
+    font-family: "Menlo", "Consolas", "Lucida Console", monospace;
+    font-size: x-large;
+}
+
 #titleblock {
     display: flex;
     align-items: center;
@@ -14,23 +23,14 @@
     right: 50px
 }
 
-#version{
-    color:lightgray;
+#version {
+    color: lightgray;
 }
 
 #grid {
     display: grid;
     gap: 50px;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-}
-
-body {
-    padding-left: 40px;
-    padding-right: 40px;
-    background-color: black;
-    color: white;
-    font-family: "Menlo", "Consolas", "Lucida Console", monospace;
-    font-size: x-large;
 }
 
 #message {
