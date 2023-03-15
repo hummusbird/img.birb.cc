@@ -6,3 +6,61 @@ body {
     font-family: "Menlo", "Consolas", "Lucida Console", monospace;
     font-size: x-large;
 }
+
+.font {
+    color: white;
+    font-family: "Menlo", "Consolas", "Lucida Console", monospace;
+}
+
+#titleblock {
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 20px
+}
+
+#titleblock a {
+    position: absolute;
+    font-size: x-large;
+    right: 50px
+}
+
+h4 {
+    margin: 0;
+    padding: 0;
+    align-self: center;
+    padding-right: 30px;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+#loginarea {
+    display: flex;
+    flex-direction: row;
+}
+
+#loginbutton {
+    background-color: #1F1F1F;
+    margin-left: 30px;
+    width: 100px;
+    height: 50px;
+    border: none;
+    font-size: large;
+    cursor: pointer;
+}
+
+#loginbutton:active {
+    background-color: #131313;
+}
+
+input {
+    background-color: #1F1F1F;
+    border: none;
+    height: 50px;
+    width: 400px;
+    font-size: large;
+    padding-left: 15px;
+    padding-right: 15px;
+}
