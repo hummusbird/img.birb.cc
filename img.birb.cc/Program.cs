@@ -42,14 +42,21 @@ app.MapPost("/api/img", async Task<IResult> (HttpRequest request) => // get your
 
     var form = await request.ReadFormAsync();
     var key = form.ToList().Find(key => key.Key == "api_key");
+    var specified_uid = form.ToList().Find(uid => uid.Key == "uid");
 
     if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null) // invalid key
     {
         return Results.Unauthorized();
     }
 
-    List<Img> images = new List<Img>();
     User user = UserDB.GetUserFromKey(key.Value);
+
+    if (specified_uid.Key is not null && UserDB.GetUserFromUID(int.Parse(specified_uid.Value)) is not null && UserDB.GetUserFromKey(key.Value).IsAdmin) // allow admins to request images via UID
+    {
+        user = UserDB.GetUserFromUID(int.Parse(specified_uid.Value));
+    }
+
+    List<Img> images = new List<Img>();
 
     foreach (var img in FileDB.GetDB().Where(img => img.UID == user.UID)) // every image which has a matching UID
     {
