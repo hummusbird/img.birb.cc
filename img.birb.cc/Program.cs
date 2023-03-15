@@ -272,7 +272,8 @@ app.MapPost("/api/upload", async (http) => // upload file
         await img.CopyToAsync(stream);
     }
 
-    Log.Info($"New File: {newFile.Filename}");
+    Log.Info($"New upload: {newFile.Filename}");
+    Log.Info($"UID: {user.UID} Username: {user.Username}");
     string[] domains = user.Domain!.Split("\r\n");
     string domain = domains[Hashing.rand.Next(domains.Length)];
 
