@@ -1,0 +1,8 @@
+body {
+    padding-left: 40px;
+    padding-right: 40px;
+    background-color: black;
+    color: white;
+    font-family: "Menlo", "Consolas", "Lucida Console", monospace;
+    font-size: x-large;
+}
