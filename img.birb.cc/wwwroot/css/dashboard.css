@@ -67,7 +67,6 @@ h2 {
 
 #loginbutton:active {
     background-color: #131313;
-
 }
 
 input {
@@ -113,7 +112,7 @@ textarea {
 }
 
 .yeswrap {
-    white-space:initial;
+    white-space: initial;
 }
 
 #images {
@@ -308,7 +307,7 @@ input::-webkit-inner-spin-button {
 }
 
 input[type=number] {
-    -moz-appearance:textfield;
+    -moz-appearance: textfield;
 }
 
 footer {
