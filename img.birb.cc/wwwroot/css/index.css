@@ -37,6 +37,17 @@ body {
     overflow-wrap: break-word;
 }
 
+.topbtn {
+    text-decoration: none;
+    font-family: "Menlo", "Consolas", "Lucida Console", monospace;
+    background: #1F1F1F;
+    font-size: large;
+    border: none;
+    color: white;
+    padding: 15px;
+    cursor: pointer;
+}
+
 p {
     font-size: x-large;
 }
