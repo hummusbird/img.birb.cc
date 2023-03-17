@@ -24,7 +24,6 @@ async function login() {
             })
         .catch(e => document.getElementById("loginstat").innerHTML = "failed to login")
         .then(e => { if (usersout) { buildTable() } })
-
 }
 
 async function getimgs(uid) {
@@ -49,6 +48,14 @@ async function getimgs(uid) {
 }
 
 async function buildTable() {
+
+    // todo:
+    // nuke imgs per user
+    // invite gen
+    // lock / unlock user
+    // create new user
+    // reset API keys
+
     let table = document.getElementById("table")
     table.innerHTML = ""
 
@@ -94,7 +101,29 @@ async function buildTable() {
     uploadsize_title.innerHTML = "size"
     uploadcount_title.innerHTML = "uploads"
     username_title.innerHTML = "username"
+}
 
+async function newuser(name, uid) {
+    let formData = new FormData();
+    formData.append("api_key", document.getElementById("keybox").value)
+    formData.append("username", name)
+    if (uid != null) { formData.append("uid", uid) }
+
+    let token;
+
+    await fetch(`https://${url}/api/usr/new`,
+        {
+            body: formData,
+            method: "post"
+        })
+        .then(res => res.json())
+        .then(
+            data => {
+                token = data
+            })
+        .catch(e => { console.log(e) })
+
+    return token;
 }
 
 function numberWithCommas(x) {
