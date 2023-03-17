@@ -20,9 +20,7 @@ public class User
         return new UsersDTO
         {
             Username = this.Username,
-            UID = this.UID,
-            UploadedBytes = this.UploadedBytes,
-            UploadCount = this.UploadCount
+            UID = this.UID
         };
     }
 
