@@ -20,6 +20,8 @@ async function login() {
                 document.getElementById("loginstat").innerHTML = "api key:"
                 document.getElementById("loginarea").style.display = "none"
 
+                document.getElementById("newuserblock").style.display = "block"
+
                 table.style.display = "table"
             })
         .catch(e => document.getElementById("loginstat").innerHTML = "failed to login")
@@ -80,7 +82,7 @@ async function buildTable() {
         admin.innerHTML = user["isAdmin"]
 
         data = await getimgs(user["uid"])
-        last.innerHTML = changeToTime(Math.round((new Date().getTime() - Date.parse(data[data.length - 1]["timestamp"])) / 1000 / 60)) + " ago"
+        last.innerHTML = user["uploadCount"] != 0 ? changeToTime(Math.round((new Date().getTime() - Date.parse(data[data.length - 1]["timestamp"])) / 1000 / 60)) + " ago" : "never"
     });
 
     var title = table.insertRow(0)
@@ -101,6 +103,15 @@ async function buildTable() {
     uploadsize_title.innerHTML = "size"
     uploadcount_title.innerHTML = "uploads"
     username_title.innerHTML = "username"
+}
+
+async function submitnewuser() {
+    let name = document.getElementById("username").value
+    let uidbox = document.getElementById("UID")
+    let uid = null;
+    if (uidbox != null) { uid = uidbox.value }
+
+    document.getElementById("newuseroutput").value = await newuser(name, uid)
 }
 
 async function newuser(name, uid) {
@@ -132,16 +143,16 @@ function numberWithCommas(x) {
 
 function bytes(x) {
     if (x < 1024) {
-        return (numberWithCommas(x) + " bytes")
+        return (numberWithCommas(x) + " b")
     }
     if (x >= 1024 && x < 1048576) {
-        return (numberWithCommas(Math.round(x / 1024)) + " kilobytes")
+        return (numberWithCommas(Math.round(x / 1024)) + " kb")
     }
     if (x >= 1048576 && x < 1073741824) {
-        return (numberWithCommas(Math.round(x / 1024 / 10.24) / 100) + " megabytes")
+        return (numberWithCommas(Math.round(x / 1024 / 10.24) / 100) + " mb")
     }
     if (x >= 1073741824) {
-        return (numberWithCommas(Math.round(x / 1024 / 1024 / 10.24) / 100) + " gigabytes")
+        return (numberWithCommas(Math.round(x / 1024 / 1024 / 10.24) / 100) + " gb")
     }
 }
 
