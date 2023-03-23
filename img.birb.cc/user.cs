@@ -59,8 +59,6 @@ public class UsersDTO // used for /api/users
 {
     public string? Username { get; set; }
     public int UID { get; set; }
-    public long UploadedBytes { get; set; } = 0;
-    public int UploadCount { get; set; } = 0;
 }
 
 public class UsrDTO // used for /api/usr
