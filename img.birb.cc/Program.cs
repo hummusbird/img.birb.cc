@@ -136,7 +136,7 @@ app.MapPost("/api/usr/new", async Task<IResult> (HttpRequest request) => // crea
     };
     UserDB.AddUser(newUser);
 
-    Log.Info($"New User: {NewUsername} + {NewUID}");
+    Log.Info($"New user! USERNAME: {NewUsername} UID: {NewUID}");
 
     return Results.Json("{\"" + NewUsername + "\": \"" + NewKey + "\"}");
 });
