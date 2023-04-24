@@ -5,7 +5,6 @@ using System.Text.RegularExpressions;
 // TODO:
 
 // make a release
-// admin panel
 // key rotation
 // EXIF strip
 // checksum + multiple file check
@@ -265,10 +264,10 @@ app.MapPost("/api/upload", async (http) => // upload file
         Stream? stream = new MemoryStream();
         await img.CopyToAsync(stream!);
 
-        if (!Config.HasAllowedMagicBytes(stream!))
+        if (!Img.HasAllowedMagicBytes(stream!))
         {
             http.Response.StatusCode = 400;
-            Log.Warning("illegal filetype");
+            Log.Warning("Illegal filetype - Upload rejected");
             return;
         }
     }
