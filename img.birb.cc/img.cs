@@ -49,11 +49,6 @@ public class Img
 
     public static Stream StripExif(Stream stream)
     {
-
-        // todo: replace with 
-        // byte[] rest;
-        // ms.Write(rest, ms.Length-ms.Position, rest.Length);
-
         int exif_pos = 0;
         int exif_len = 0;
 
@@ -64,34 +59,21 @@ public class Img
             if (stream.ReadByte() == 255 && stream.ReadByte() == 225) // match 0xFFE1
             {
                 exif_pos = (int)stream.Position;
-                exif_len = stream.ReadByte() * 256 + stream.ReadByte();
-
-                Stream strippedstream = new MemoryStream();
-                strippedstream.SetLength(stream.Length - exif_len); // set newstream length to length of old stream minus Exif
-
-                Log.Debug("streamlen: " + stream.Length);
-                Log.Debug("newlen: " + (stream.Length - exif_len));
+                exif_len = stream.ReadByte() * 256 + stream.ReadByte(); // next two bytes indicate the Exif length
 
                 stream.Position = 0;
-                byte[] pre_exif = new byte[16];
-                stream.Read(pre_exif, 0, exif_pos - 2); // read bytes up until header into pre_exif
+                byte[] buffer = new byte[stream.Length - exif_len - 2]; // set buffer length to stream minus exif minus header
+                stream.Read(buffer, 0, exif_pos - 2); // read bytes up until exif header
+                stream.Position = exif_len + exif_pos; // move pos to after exif
+                stream.Read(buffer, exif_pos - 2, (int)stream.Length - exif_len - exif_pos); // read bytes from exif end to file end
 
-                stream.Position = exif_len + exif_pos;
-                byte[] post_exif = new byte[(int)stream.Length - exif_len];
-                stream.Read(post_exif, 0, (int)stream.Length - exif_len - exif_pos); // read bytes from end of exif to end of stream into post_exif
-
-                Log.Debug("exif len: " + (exif_len));
-                Log.Debug("exif pos: " + (exif_pos));
-
-                strippedstream.Position = 0;
-                strippedstream.Write(pre_exif, 0, exif_pos - 2); // write pre_exif into stripped stream
-                strippedstream.Write(post_exif, 0, (int)stream.Length - exif_len - exif_pos); // write post_exif into stripped stream
+                Stream strippedstream = new MemoryStream(buffer);
 
                 return strippedstream;
             }
         }
 
-        return stream;
+        return stream; // return stream if no Exif header found
     }
 }
 
