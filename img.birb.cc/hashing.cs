@@ -43,12 +43,12 @@ public static class Hashing
 
     public static string NewHash(int length)
     {
-        string b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        string alphanumerics = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
         string hash = String.Empty;
         for (int i = 0; i < length; i++)
         {
-            hash += b64[rand.Next(b64.Length)];
+            hash += alphanumerics[rand.Next(alphanumerics.Length)];
         }
 
         return hash;
