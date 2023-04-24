@@ -52,7 +52,7 @@ public class Img
         int exif_pos = 0;
         int exif_len = 0;
 
-        for (int i = 0; i < 16; i++) // read first 16 bytes
+        for (int i = 0; i < 64; i++) // read first 64 bytes
         {
             stream.Position = i; // reset position if 0xFF is read without 0xE1
 
@@ -66,6 +66,8 @@ public class Img
                 stream.Read(buffer, 0, exif_pos - 2); // read bytes up until Exif header
                 stream.Position = exif_len + exif_pos; // move pos to after Exif
                 stream.Read(buffer, exif_pos - 2, (int)stream.Length - exif_len - exif_pos); // read bytes from Exif end to file end
+
+                Log.Info($"stripped {exif_len} Exif bytes from image");
 
                 return new MemoryStream(buffer);
             }
