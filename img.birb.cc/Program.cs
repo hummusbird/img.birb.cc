@@ -259,11 +259,11 @@ app.MapPost("/api/upload", async (http) => // upload file
 
     string extension = Path.GetExtension(img.FileName);
 
-    if (UserDB.GetUserFromKey(key.Value).IsAdmin == false) // only check magic bytes for non-admins
-    {
-        Stream? stream = new MemoryStream();
-        await img.CopyToAsync(stream);
+    Stream? stream = new MemoryStream();
+    await img.CopyToAsync(stream); // copy image to memorystream
 
+    if (UserDB.GetUserFromKey(key.Value).IsAdmin != true) // only check magic bytes for non-admins
+    {
         if (!Img.HasAllowedMagicBytes(stream))
         {
             http.Response.StatusCode = 400;
@@ -272,21 +272,15 @@ app.MapPost("/api/upload", async (http) => // upload file
         }
     }
 
-    // todo: clean up streams, check length when settings stream = Img.StripExif(stream)
-    // remove fileheader stream and use exifstream
-
-    Stream? exifstream = new MemoryStream();
-    await img.CopyToAsync(exifstream);
-
-    Stream strippedstream = Img.StripExif(exifstream);
+    stream = Img.StripExif(stream);
 
     User user = UserDB.GetUserFromKey(key.Value);
     Img newFile = new Img().NewImg(user.UID, extension, img);
 
-    using (var stream = System.IO.File.Create("wwwroot/" + newFile.Filename))
+    using (var filestream = System.IO.File.Create("wwwroot/" + newFile.Filename))
     {
-        strippedstream.Position = 0;
-        strippedstream.CopyTo(stream);
+        stream.Position = 0;
+        stream.CopyTo(filestream);
     }
 
     Log.Info($"New upload: {newFile.Filename}");
