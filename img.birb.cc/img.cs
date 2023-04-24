@@ -62,14 +62,12 @@ public class Img
                 exif_len = stream.ReadByte() * 256 + stream.ReadByte(); // next two bytes indicate the Exif length
 
                 stream.Position = 0;
-                byte[] buffer = new byte[stream.Length - exif_len - 2]; // set buffer length to stream minus exif minus header
-                stream.Read(buffer, 0, exif_pos - 2); // read bytes up until exif header
-                stream.Position = exif_len + exif_pos; // move pos to after exif
-                stream.Read(buffer, exif_pos - 2, (int)stream.Length - exif_len - exif_pos); // read bytes from exif end to file end
+                byte[] buffer = new byte[stream.Length - exif_len - 2]; // set buffer length to stream minus Exif minus header
+                stream.Read(buffer, 0, exif_pos - 2); // read bytes up until Exif header
+                stream.Position = exif_len + exif_pos; // move pos to after Exif
+                stream.Read(buffer, exif_pos - 2, (int)stream.Length - exif_len - exif_pos); // read bytes from Exif end to file end
 
-                Stream strippedstream = new MemoryStream(buffer);
-
-                return strippedstream;
+                return new MemoryStream(buffer);
             }
         }
 
