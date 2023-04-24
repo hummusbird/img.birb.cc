@@ -250,7 +250,7 @@ textarea {
     color: #ffffff;
 }
 
-#showURL {
+.checkbox {
     height: 20px;
     width: 20px;
     margin-top: 2px;

@@ -32,7 +32,7 @@ async function login() {
                 document.getElementById("showURL").checked = usrout["showURL"]
                 document.getElementById("domain").value = usrout["domain"]
                 document.getElementById("feedback").value = usrout["dashMsg"]
-                document.getElementById("isAdmin").innerHTML = usrout["isAdmin"]
+                document.getElementById("stripEXIF").checked = usrout["stripEXIF"]
 
                 document.getElementById("current").innerHTML = usrout["dashMsg"].length
             })
@@ -113,6 +113,7 @@ async function submitSettings() {
         formData.append("api_key", document.getElementById("keybox").value)
         formData.append("domain", document.getElementById("domain").value)
         formData.append("showURL", document.getElementById("showURL").checked)
+        formData.append("stripEXIF", document.getElementById("stripEXIF").checked)
         formData.append("dashMsg", document.getElementById("feedback").value)
 
         fetch(`https://${url}/api/usr/settings`,
