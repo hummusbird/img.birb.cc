@@ -14,6 +14,7 @@ public class User
     public string Domain = Config.DefaultDomain!;
     public string? DashMsg;
     public bool ShowURL;
+    public bool StripEXIF;
 
     public UsersDTO UsersToDTO() // public user info
     {
@@ -36,7 +37,8 @@ public class User
             IsAdmin = this.IsAdmin,
             Domain = this.Domain,
             DashMsg = this.DashMsg,
-            ShowURL = this.ShowURL
+            ShowURL = this.ShowURL,
+            StripEXIF = this.StripEXIF
         };
     }
 
@@ -72,6 +74,7 @@ public class UsrDTO // used for /api/usr
     public string Domain { get; set; } = Config.DefaultDomain!;
     public string? DashMsg { get; set; }
     public bool ShowURL { get; set; }
+    public bool StripEXIF { get; set; }
 }
 
 public class DashDTO // used for /api/dashmsg
@@ -115,6 +118,7 @@ public static class UserDB
                 UID = 0,
                 APIKey = Hashing.HashString(apikey),
                 IsAdmin = true,
+                StripEXIF = true,
                 DashMsg = "literally sharex compatible"
             };
 
