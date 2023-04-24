@@ -262,9 +262,9 @@ app.MapPost("/api/upload", async (http) => // upload file
     if (UserDB.GetUserFromKey(key.Value).IsAdmin == false) // only check magic bytes for non-admins
     {
         Stream? stream = new MemoryStream();
-        await img.CopyToAsync(stream!);
+        await img.CopyToAsync(stream);
 
-        if (!Img.HasAllowedMagicBytes(stream!))
+        if (!Img.HasAllowedMagicBytes(stream))
         {
             http.Response.StatusCode = 400;
             Log.Warning("Illegal filetype - Upload rejected");
@@ -272,12 +272,21 @@ app.MapPost("/api/upload", async (http) => // upload file
         }
     }
 
+    // todo: clean up streams, check length when settings stream = Img.StripExif(stream)
+    // remove fileheader stream and use exifstream
+
+    Stream? exifstream = new MemoryStream();
+    await img.CopyToAsync(exifstream);
+
+    Stream strippedstream = Img.StripExif(exifstream);
+
     User user = UserDB.GetUserFromKey(key.Value);
     Img newFile = new Img().NewImg(user.UID, extension, img);
 
     using (var stream = System.IO.File.Create("wwwroot/" + newFile.Filename))
     {
-        await img.CopyToAsync(stream);
+        strippedstream.Position = 0;
+        strippedstream.CopyTo(stream);
     }
 
     Log.Info($"New upload: {newFile.Filename}");

@@ -46,6 +46,53 @@ public class Img
 
         return false;
     }
+
+    public static Stream StripExif(Stream stream)
+    {
+
+        // todo: replace with 
+        // byte[] rest;
+        // ms.Write(rest, ms.Length-ms.Position, rest.Length);
+
+        int exif_pos = 0;
+        int exif_len = 0;
+
+        for (int i = 0; i < 16; i++) // read first 16 bytes
+        {
+            stream.Position = i; // reset position if 0xFF is read without 0xE1
+
+            if (stream.ReadByte() == 255 && stream.ReadByte() == 225) // match 0xFFE1
+            {
+                exif_pos = (int)stream.Position;
+                exif_len = stream.ReadByte() * 256 + stream.ReadByte();
+
+                Stream strippedstream = new MemoryStream();
+                strippedstream.SetLength(stream.Length - exif_len); // set newstream length to length of old stream minus Exif
+
+                Log.Debug("streamlen: " + stream.Length);
+                Log.Debug("newlen: " + (stream.Length - exif_len));
+
+                stream.Position = 0;
+                byte[] pre_exif = new byte[16];
+                stream.Read(pre_exif, 0, exif_pos - 2); // read bytes up until header into pre_exif
+
+                stream.Position = exif_len + exif_pos;
+                byte[] post_exif = new byte[(int)stream.Length - exif_len];
+                stream.Read(post_exif, 0, (int)stream.Length - exif_len - exif_pos); // read bytes from end of exif to end of stream into post_exif
+
+                Log.Debug("exif len: " + (exif_len));
+                Log.Debug("exif pos: " + (exif_pos));
+
+                strippedstream.Position = 0;
+                strippedstream.Write(pre_exif, 0, exif_pos - 2); // write pre_exif into stripped stream
+                strippedstream.Write(post_exif, 0, (int)stream.Length - exif_len - exif_pos); // write post_exif into stripped stream
+
+                return strippedstream;
+            }
+        }
+
+        return stream;
+    }
 }
 
 public class Stats
