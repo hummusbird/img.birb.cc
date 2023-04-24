@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title id=toptitle>img.birb.cc</title>
+    <script src="./js/index.js"></script>
+    <link rel="shortcut icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="./css/index.css">
+</head>
+
+<body>
+    <div id=titleblock>
+        <h1 id=title>welcome to img.birb.cc</h1>
+        <h5 id=version>v2.0.0</h5>
+        <a id=login class=topbtn href="dashboard.html">login</a>
+    </div>
+
+    <div id=grid>
+        <div id=faq>
+            <h2>faq:</h2>
+            <p class="q">- can i have an api key?</p>
+            <p class="a">no</p>
+
+            <p class="q">- how does it work?</p>
+            <a class="a" href="https://github.com/hummusbird/img.birb.cc">like this</a>
+
+            <p class="q">- can i host this myself?</p>
+            <p class="a">yes</p>
+        </div>
+
+        <div id=stats>
+            <h2>stats:</h2>
+            <p id=files>-- files uploaded</p>
+            <p id=users>-- registered users</p>
+            <p id=gb>-- gb used</p>
+            <p id=time>-- since last upload</p>
+            <script>
+                setTitle();
+                stats();
+                dashmsg();
+                setInterval(stats, 60000);
+            </script>
+        </div>
+
+        <div id="changelog">
+            <h2>v2.0.0</h2>
+            <p class="q">- files now actively served</p>
+            <p class="q">- added Exif stripping</p>
+            <p class="q">- added admin panel</p>
+            <p class="q">- a few more backend changes</p>
+        </div>
+
+        <div>
+            <h2>user feedback:</h2>
+            <p class="q" id="message">--</p>
+            <p class="a" id="username">--</p>
+        </div>
+    </div>
+</body>

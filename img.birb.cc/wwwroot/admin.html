@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>admin</title>
+    <link rel="shortcut icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="./css/admin.css">
+</head>
+
+<body>
+    <div id="titleblock">
+        <h1>admin panel</h1>
+    </div>
+
+    <div id="loginarea">
+        <h4 id="loginstat">login:</h4>
+        <input class=font id=keybox type="password" placeholder="api key">
+        <button class=font id="loginbutton" onclick="login();">login</button>
+    </div>
+
+    <table id="table"> <!--this table is populated via js-->
+    </table>
+
+    <span></span>
+
+    <div id="newuserblock">
+        <h4>new user:</h4>
+        <input class=font id="username" placeholder="username">
+        <input class=font id="UID" placeholder="uid">
+        <button class=font id="submitnewuser" onclick="submitnewuser()">submit</button>
+
+        <textarea class=font id="newuseroutput" readonly placeholder="output"></textarea>
+    </div>
+
+
+
+    <script src="./js/admin.js"></script>
+</body>
+
+<footer>
+
+</footer>

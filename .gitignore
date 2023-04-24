@@ -12,6 +12,9 @@
 img.json
 salt.txt
 user.json
+config.json
+
+.vscode/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

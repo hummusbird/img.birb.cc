@@ -1,39 +1,73 @@
-﻿using Newtonsoft.Json;
-using Microsoft.AspNetCore.HttpOverrides;
+﻿using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Http.Features;
-using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+// TODO:
 
-var builder = WebApplication.CreateBuilder(args);
+// make a release
+// key rotation
+// EXIF strip
+// checksum + multiple file check
+// invite gen
+// comments
+
+string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("*").AllowAnyHeader().AllowAnyMethod(); ;
+            policy.WithOrigins("*").AllowAnyHeader().AllowAnyMethod();
         });
 });
 
-var app = builder.Build();
-
-string[] fileTypes = { ".jpg", ".jpeg", ".png", ".gif", ".mp4", ".mp3", ".wav" };
+WebApplication app = builder.Build();
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 });
 
-app.UseHttpsRedirection();
+app.UseHttpsRedirection();  // redirect 80 to 443
+app.UseDefaultFiles();      // use index.html & index.cs
+app.UseStaticFiles();       // enable static file serving
+app.UseCors(MyAllowSpecificOrigins);
 
-app.MapPost("/api/img", async Task<IResult> (HttpRequest request) =>
+app.MapPost("/api/img", async Task<IResult> (HttpRequest request) => // get your uploaded files
 {
-    if (!request.HasFormContentType)
+    if (!request.HasFormContentType) { return Results.BadRequest(); }
+
+    var form = await request.ReadFormAsync();
+    var key = form.ToList().Find(key => key.Key == "api_key");
+    var specified_uid = form.ToList().Find(uid => uid.Key == "uid");
+
+    if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null) // invalid key
     {
-        return Results.BadRequest();
+        return Results.Unauthorized();
     }
+
+    User user = UserDB.GetUserFromKey(key.Value);
+
+    if (specified_uid.Key is not null && UserDB.GetUserFromUID(int.Parse(specified_uid.Value)) is not null && UserDB.GetUserFromKey(key.Value).IsAdmin) // allow admins to request images via UID
+    {
+        user = UserDB.GetUserFromUID(int.Parse(specified_uid.Value));
+    }
+
+    List<Img> images = new List<Img>();
+
+    foreach (var img in FileDB.GetDB().Where(img => img.UID == user.UID)) // every image which has a matching UID
+    {
+        images.Add(img);
+    }
+
+    return Results.Ok(images);
+});
+
+app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) => // get your user data
+{
+    if (!request.HasFormContentType) { return Results.BadRequest(); }
 
     var form = await request.ReadFormAsync();
     var key = form.ToList().Find(key => key.Key == "api_key");
@@ -43,29 +77,12 @@ app.MapPost("/api/img", async Task<IResult> (HttpRequest request) =>
         return Results.Unauthorized();
     }
 
-    else
-    {
-        List<Img> temp = new List<Img>();
-        User user = UserDB.GetUserFromKey(key.Value);
-
-        foreach (var img in FileDB.GetDB())
-        {
-            if (img.UID == user.UID)
-            {
-                temp.Add(img);
-            }
-        }
-
-        return Results.Ok(temp);
-    }
+    return Results.Ok(UserDB.GetDB().Find(uid => uid.UID == UserDB.GetUserFromKey(key.Value).UID)!.UsrToDTO());
 });
 
-app.MapPost("/api/usr/new", async Task<IResult> (HttpRequest request) =>
+app.MapPost("/api/usr/new", async Task<IResult> (HttpRequest request) => // create new user
 {
-    if (!request.HasFormContentType)
-    {
-        return Results.BadRequest();
-    }
+    if (!request.HasFormContentType) { return Results.BadRequest(); }
 
     var form = await request.ReadFormAsync();
     var key = form.ToList().Find(key => key.Key == "api_key");
@@ -91,7 +108,7 @@ app.MapPost("/api/usr/new", async Task<IResult> (HttpRequest request) =>
 
     if (string.IsNullOrEmpty(UID.Value) || UID.Key is null)
     {
-        while (UserDB.GetUserFromUID(NewUID) is not null)
+        while (UserDB.GetUserFromUID(NewUID) is not null) // increase UID until a non-taken one is found
         {
             NewUID += 1;
         }
@@ -113,38 +130,19 @@ app.MapPost("/api/usr/new", async Task<IResult> (HttpRequest request) =>
     User newUser = new User
     {
         Username = NewUsername,
-        IsAdmin = false,
         UID = NewUID,
-        UploadCount = 0,
         APIKey = Hashing.HashString(NewKey),
-        ShowURL = true,
-        Domain = "img.birb.cc"
     };
-
     UserDB.AddUser(newUser);
 
-    string SXCU = "{\n";
-    SXCU += "\"Version\": \"13.7.0\",\n";
-    SXCU += "\"Name\": \"birb.cc\",\n";
-    SXCU += "\"DestinationType\": \"ImageUploader\",\n";
-    SXCU += "\"RequestMethod\": \"POST\",\n";
-    SXCU += $"\"RequestURL\": \"https://{newUser.Domain}/api/upload\",\n";
-    SXCU += "\"Body\": \"MultipartFormData\",\n";
-    SXCU += "\"Arguments\": {\n";
-    SXCU += $"\"api_key\": \"{NewKey}\"\n";
-    SXCU += "},\n";
-    SXCU += "\"FileFormName\": \"img\"\n";
-    SXCU += "}";
+    Log.Info($"New user! USERNAME: {NewUsername} UID: {NewUID}");
 
-    return Results.Text(SXCU);
+    return Results.Json("{\"" + NewUsername + "\": \"" + NewKey + "\"}");
 });
 
-app.MapPost("/api/usr/settings", async Task<IResult> (HttpRequest request) =>
+app.MapPost("/api/usr/settings", async Task<IResult> (HttpRequest request) => // update user settings
 {
-    if (!request.HasFormContentType)
-    {
-        return Results.BadRequest();
-    }
+    if (!request.HasFormContentType) { return Results.BadRequest(); }
 
     var form = await request.ReadFormAsync();
     var key = form.ToList().Find(key => key.Key == "api_key");
@@ -157,12 +155,18 @@ app.MapPost("/api/usr/settings", async Task<IResult> (HttpRequest request) =>
     var domain = form.ToList().Find(newDomain => newDomain.Key == "domain");
     var dashMsg = form.ToList().Find(dashMsg => dashMsg.Key == "dashMsg");
     var showURL = form.ToList().Find(showURL => showURL.Key == "showURL");
+    var stripExif = form.ToList().Find(stripExif => stripExif.Key == "stripEXIF");
 
     User user = UserDB.GetUserFromKey(key.Value);
 
     if (!string.IsNullOrEmpty(showURL.Value) && showURL.Value == "true" || showURL.Value == "false")
     {
         user.ShowURL = System.Convert.ToBoolean(showURL.Value);
+    }
+
+    if (!string.IsNullOrEmpty(stripExif.Value) && stripExif.Value == "true" || stripExif.Value == "false")
+    {
+        user.StripEXIF = System.Convert.ToBoolean(stripExif.Value);
     }
 
     if (!string.IsNullOrEmpty(dashMsg.Value))
@@ -184,12 +188,9 @@ app.MapPost("/api/usr/settings", async Task<IResult> (HttpRequest request) =>
     return Results.Accepted();
 });
 
-app.MapPost("/api/users", async Task<IResult> (HttpRequest request) =>
+app.MapPost("/api/users", async Task<IResult> (HttpRequest request) => // get registered users
 {
-    if (!request.HasFormContentType)
-    {
-        return Results.BadRequest();
-    }
+    if (!request.HasFormContentType) { return Results.BadRequest(); }
 
     var form = await request.ReadFormAsync();
     var key = form.ToList().Find(key => key.Key == "api_key");
@@ -199,7 +200,7 @@ app.MapPost("/api/users", async Task<IResult> (HttpRequest request) =>
         return Results.Unauthorized();
     }
 
-    if (UserDB.GetUserFromKey(key.Value).IsAdmin)
+    if (UserDB.GetUserFromKey(key.Value).IsAdmin) // return private info for admins
     {
         return Results.Ok(UserDB.GetDB().Select(x => x.UsrToDTO()).ToList());
     }
@@ -207,54 +208,36 @@ app.MapPost("/api/users", async Task<IResult> (HttpRequest request) =>
     return Results.Ok(UserDB.GetDB().Select(x => x.UsersToDTO()).ToList());
 });
 
-app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) =>
-{
-    if (!request.HasFormContentType)
-    {
-        return Results.BadRequest();
-    }
-
-    var form = await request.ReadFormAsync();
-    var key = form.ToList().Find(key => key.Key == "api_key");
-
-    if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null) // invalid key
-    {
-        return Results.Unauthorized();
-    }
-
-    return Results.Ok(UserDB.GetDB().Find(uid => uid.UID == UserDB.GetUserFromKey(key.Value).UID).UsrToDTO());
-});
-
-app.MapGet("/api/dashmsg", () =>
+app.MapGet("/api/dashmsg", () => // get one random username + dashmsg
 {
     List<DashDTO> usrlist = new List<DashDTO>();
-    foreach (User user in UserDB.GetDB())
+    foreach (User user in UserDB.GetDB().Where(user => !string.IsNullOrEmpty(user.DashMsg)))
     {
-        if (!string.IsNullOrEmpty(user.DashMsg))
-        {
-            usrlist.Add(user.DashToDTO());
-        }
+        usrlist.Add(user.DashToDTO());
     }
 
     return usrlist.Count == 0 ? Results.NoContent() : Results.Ok(usrlist[Hashing.rand.Next(usrlist.Count)]);
 });
 
-app.MapGet("/api/stats", async () =>
+app.MapGet("/api/stats", async () => // get host stats
 {
     Stats stats = new Stats();
     stats.Files = FileDB.GetDB().Count;
     stats.Users = UserDB.GetDB().Count;
-    DirectoryInfo dirInfo = new DirectoryInfo(@"img/");
-    stats.Bytes = await Task.Run(() => dirInfo.EnumerateFiles("*", SearchOption.TopDirectoryOnly).Sum(file => file.Length));
-    stats.Newest = FileDB.GetDB().Last().Timestamp;
+
+    // iterate through every file in wwwroot, ignoring .* and *.html and favicon - then sum filesize.
+    DirectoryInfo dirInfo = new DirectoryInfo(@"wwwroot/");
+    stats.Bytes = await Task.Run(() => dirInfo.EnumerateFiles("*", SearchOption.TopDirectoryOnly).Where(file => file.Extension != ".html" && !file.Name.StartsWith(".") && file.Name != "favicon.png").Sum(file => file.Length));
+
+    // get timestamp of latest uploaded file
+    if (FileDB.GetDB().Count > 0) { stats.Newest = FileDB.GetDB().Last().Timestamp; }
 
     return Results.Ok(stats);
 });
 
-app.MapPost("/api/upload", async (http) =>
+app.MapPost("/api/upload", async (http) => // upload file
 {
-    http.Features.Get<IHttpMaxRequestBodySizeFeature>().MaxRequestBodySize = null; // removes max filesize (set max in NGINX, not here)
-
+    http.Features.Get<IHttpMaxRequestBodySizeFeature>()!.MaxRequestBodySize = null; // removes max filesize (set max in NGINX, not here)
 
     if (!http.Request.HasFormContentType)
     {
@@ -275,38 +258,49 @@ app.MapPost("/api/upload", async (http) =>
 
     if (img is null || img.Length == 0) // no file or no file extention
     {
-        Console.WriteLine("Invalid upload");
+        Log.Warning("Invalid upload");
         http.Response.StatusCode = 400;
         return;
     }
 
     string extension = Path.GetExtension(img.FileName);
 
-    if (extension is null || extension.Length == 0 || !fileTypes.Contains(extension) && !UserDB.GetUserFromKey(key.Value).IsAdmin) // invalid extension
+    Stream? stream = new MemoryStream();
+    await img.CopyToAsync(stream); // copy image to memorystream
+
+    if (UserDB.GetUserFromKey(key.Value).IsAdmin != true) // only check magic bytes for non-admins
     {
-        http.Response.StatusCode = 400;
-        return;
+        if (!Img.HasAllowedMagicBytes(stream))
+        {
+            http.Response.StatusCode = 400;
+            Log.Warning("Illegal filetype - Upload rejected");
+            return;
+        }
     }
 
-    Img newFile = new Img();
     User user = UserDB.GetUserFromKey(key.Value);
 
-    newFile.NewImg(user.UID, extension, img);
+    if (user.StripEXIF) { stream = Img.StripExif(stream); }
+    else { Log.Warning("Exif NOT stripped - user disabled"); }
 
-    using (var stream = System.IO.File.Create("img/" + newFile.Filename))
+    Img newFile = new Img().NewImg(user.UID, extension, img);
+
+    using (var filestream = System.IO.File.Create("wwwroot/" + newFile.Filename))
     {
-        await img.CopyToAsync(stream);
+        stream.Position = 0;
+        stream.CopyTo(filestream);
     }
 
-    Console.WriteLine($"New File: {newFile.Filename}");
-    string[] domains = user.Domain.Split("\r\n");
+    Log.Info($"New upload: {newFile.Filename}");
+    Log.Info($"UID: {user.UID} Username: {user.Username}");
+    string[] domains = user.Domain!.Split("\r\n");
     string domain = domains[Hashing.rand.Next(domains.Length)];
-    
+
     await http.Response.WriteAsync($"{(user.ShowURL ? "​" : "")}https://{domain}/" + newFile.Filename); // First "" contains zero-width space
     return;
 });
 
-app.MapDelete("/api/delete/{hash}", async Task<IResult> (HttpRequest request, string hash) =>
+app.MapDelete("/api/delete/{hash}", async Task<IResult> (HttpRequest request, string hash) => // delete specific file
 {
     if (!request.HasFormContentType || string.IsNullOrEmpty(hash))
     {
@@ -337,12 +331,9 @@ app.MapDelete("/api/delete/{hash}", async Task<IResult> (HttpRequest request, st
     return Results.Unauthorized();
 });
 
-app.MapDelete("/api/nuke", async Task<IResult> (HttpRequest request) =>
+app.MapDelete("/api/nuke", async Task<IResult> (HttpRequest request) => // delete all your files
 {
-    if (!request.HasFormContentType )
-    {
-        return Results.BadRequest();
-    }
+    if (!request.HasFormContentType) { return Results.BadRequest(); }
 
     var form = await request.ReadFormAsync();
     var key = form.ToList().Find(key => key.Key == "api_key");
@@ -353,355 +344,14 @@ app.MapDelete("/api/nuke", async Task<IResult> (HttpRequest request) =>
     }
 
     FileDB.Nuke(UserDB.GetUserFromKey(key.Value));
- 
+
     return Results.Ok();
 });
 
+Log.Initialize();
+Config.Load();
 Hashing.LoadSalt();
 FileDB.Load();
 UserDB.Load();
 
-app.UseCors(MyAllowSpecificOrigins);
-
 app.Run();
-
-public static class Hashing
-{
-    public static Random rand = new Random();
-    private static string? salt;
-
-    public static void LoadSalt()
-    {
-        try
-        {
-            using (StreamReader SR = new StreamReader("salt.txt"))
-            {
-                salt = SR.ReadToEnd();
-            }
-            Console.WriteLine($"Loaded salt");
-        }
-        catch
-        {
-            Console.WriteLine($"Unable to load salt");
-        }
-
-        if (!File.Exists("salt.txt") || string.IsNullOrEmpty(salt))
-        {
-            Console.WriteLine("Generating new salt. Keep this safe!!!");
-            using (StreamWriter SW = new StreamWriter("salt.txt"))
-            {
-                salt = NewHash(40);
-                SW.WriteLine(salt);
-            }
-        }
-    }
-
-    public static string HashString(string input) // yes, i know the use of "hash" is very inconsistent. shut up.
-    {
-        byte[] hash;
-        using (SHA512 shaM = new SHA512Managed())
-        {
-            hash = shaM.ComputeHash(System.Text.Encoding.UTF8.GetBytes(input + salt));
-        }
-        return Convert.ToBase64String(hash);
-    }
-
-    public static string NewHash(int length)
-    {
-        string b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-        string hash = String.Empty;
-        for (int i = 0; i < length; i++)
-        {
-            hash += b64[rand.Next(b64.Length)];
-        }
-
-        return hash;
-    }
-}
-
-public class Stats
-{
-    public long Bytes { get; set; }
-    public long Users { get; set; }
-    public long Files { get; set; }
-    public DateTime Newest { get; set; }
-}
-
-public static class FileDB
-{
-    private readonly static string path = "img.json";
-    private static List<Img> db = new List<Img>();
-
-    public static List<Img> GetDB()
-    {
-        return db;
-    }
-
-    public static Img Find(string hash)
-    {
-        return db.Find(file => file.Hash == hash);
-    }
-
-    public static void Add(Img file)
-    {
-        if (Find(file.Hash) is null)
-        {
-            db.Add(file);
-            Save();
-        }
-    }
-
-    public static void Load()
-    {
-        try
-        {
-            using (StreamReader SR = new StreamReader(path))
-            {
-                string json = SR.ReadToEnd();
-
-                db = JsonConvert.DeserializeObject<List<Img>>(json);
-                Save();
-            }
-            Console.WriteLine($"Loaded DB of length {db.Count}");
-        }
-        catch
-        {
-            Console.WriteLine($"Unable to load {path}");
-        }
-
-        if (!File.Exists(path))
-        {
-            Save();
-        }
-    }
-
-    private static void Save()
-    {
-        try
-        {
-            using (StreamWriter SW = new StreamWriter(path, false))
-            {
-                SW.WriteLine(JsonConvert.SerializeObject(db, Formatting.Indented));
-                Console.WriteLine($"{path} saved!");
-            }
-        }
-        catch
-        {
-            Console.WriteLine($"Error saving {path}!");
-        }
-    }
-
-    public static void Remove(Img file)
-    {
-        db.Remove(file);
-        Save();
-
-        File.Delete("img/" + file.Filename);
-        Console.WriteLine("Removed file " + file.Filename);
-    }
-
-    public static void Nuke(User user)
-    {
-        List<Img> temp = new List<Img>(db);
-
-        foreach (Img img in temp)
-        {
-            if (img.UID == user.UID)
-            {
-                db.Remove(img);
-                File.Delete("img/" + img.Filename);
-            }
-        }
-        Console.WriteLine($"nuked {user.Username}");
-        Save();
-    }
-}
-
-public class Img
-{
-    public string? Hash { get; set; }
-    public string? Filename { get; set; }
-    public int UID { get; set; }
-
-    public DateTime Timestamp { get; set; }
-
-    public void NewImg(int uid, string extension, IFormFile img)
-    {
-        string newHash = Hashing.NewHash(8);
-        while (FileDB.Find(newHash) is not null)
-        {
-            newHash = Hashing.NewHash(8);
-        }
-
-        this.Hash = newHash;
-        this.Filename = this.Hash + extension;
-        this.UID = uid;
-        this.Timestamp = DateTime.Now;
-
-        UserDB.GetUserFromUID(uid).UploadCount++;
-        UserDB.GetUserFromUID(uid).UploadedBytes += img.Length;
-        UserDB.Save();
-
-        FileDB.Add(this);
-    }
-}
-
-public class User
-{
-    public bool IsAdmin { get; set; }
-    public string? Username { get; set; }
-    public int UID { get; set; }
-    public int UploadCount { get; set; } = 0;
-    public long UploadedBytes { get; set; } = 0;
-    public string? APIKey { get; set; }
-    public string? Domain { get; set; } = "img.birb.cc";
-    public string? DashMsg { get; set; }
-    public bool ShowURL { get; set; }
-
-    public UsersDTO UsersToDTO()
-    {
-        return new UsersDTO
-        {
-            Username = this.Username,
-            UID = this.UID,
-            UploadedBytes = this.UploadedBytes,
-            UploadCount = this.UploadCount
-        };
-    }
-
-    public UsrDTO UsrToDTO()
-    {
-        return new UsrDTO
-        {
-            IsAdmin = this.IsAdmin,
-            Username = this.Username,
-            UID = this.UID,
-            UploadCount = this.UploadCount,
-            UploadedBytes = this.UploadedBytes,
-            Domain = this.Domain,
-            DashMsg = this.DashMsg,
-            ShowURL = this.ShowURL
-        };
-    }
-
-    public DashDTO DashToDTO()
-    {
-        return new DashDTO
-        {
-            Username = this.Username,
-            DashMsg = this.DashMsg
-        };
-    }
-}
-
-public class UsersDTO // used for /api/users
-{
-    public string? Username { get; set; }
-    public int UID { get; set; }
-    public long UploadedBytes { get; set; } = 0;
-    public int UploadCount { get; set; } = 0;
-}
-
-public class UsrDTO // used for /api/usr
-{
-    public bool IsAdmin { get; set; }
-    public string? Username { get; set; }
-    public int UID { get; set; }
-    public int UploadCount { get; set; } = 0;
-    public long UploadedBytes { get; set; } = 0;
-    public string? Domain { get; set; } = "img.birb.cc";
-    public string? DashMsg { get; set; }
-    public bool ShowURL { get; set; }
-}
-
-public class DashDTO // userd for /api/dashmsg
-{
-    public string? Username { get; set; }
-    public string? DashMsg { get; set; }
-}
-
-public static class UserDB
-{
-    private readonly static string path = "user.json";
-    private static List<User> db = new List<User>();
-
-    public static void Load()
-    {
-        try
-        {
-            using (StreamReader SR = new StreamReader(path))
-            {
-                string json = SR.ReadToEnd();
-
-                db = JsonConvert.DeserializeObject<List<User>>(json);
-                Save();
-            }
-            Console.WriteLine($"Loaded DB of length {db.Count}");
-        }
-        catch
-        {
-            Console.WriteLine($"Unable to load {path}");
-        }
-
-        if (!File.Exists(path) || db.Count == 0) // Generate default admin account
-        {
-            string apikey = Hashing.NewHash(40);
-            Console.WriteLine("Generated default Admin account");
-            User newUser = new User
-            {
-                Username = "Admin",
-                IsAdmin = true,
-                UID = 0,
-                UploadCount = 0,
-                APIKey = Hashing.HashString(apikey),
-                ShowURL = true,
-                Domain = "img.birb.cc"
-            };
-            Console.WriteLine("API-KEY: " + apikey + " \nKeep this safe");
-            AddUser(newUser);
-        }
-    }
-
-    public static void Save()
-    {
-        try
-        {
-            using (StreamWriter SW = new StreamWriter(path, false))
-            {
-                SW.WriteLine(JsonConvert.SerializeObject(db, Formatting.Indented));
-                Console.WriteLine($"{path} saved!");
-            }
-        }
-        catch
-        {
-            Console.WriteLine($"Error saving {path}!");
-        }
-    }
-
-    public static void AddUser(User user)
-    {
-        db.Add(user);
-        Save();
-    }
-
-    public static List<User> GetDB()
-    {
-        return db;
-    }
-
-    public static User GetUserFromUsername(string username)
-    {
-        return db.Find(user => user.Username == username);
-    }
-
-    public static User GetUserFromUID(int uid)
-    {
-        return db.Find(user => user.UID == uid);
-    }
-
-    public static User GetUserFromKey(string key)
-    {
-        return db.Find(user => user.APIKey == Hashing.HashString(key));
-    }
-}

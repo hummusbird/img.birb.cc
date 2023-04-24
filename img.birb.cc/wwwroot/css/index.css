@@ -1,0 +1,61 @@
+body {
+    padding-left: 40px;
+    padding-right: 40px;
+    background-color: black;
+    color: white;
+    font-family: "Menlo", "Consolas", "Lucida Console", monospace;
+    font-size: x-large;
+}
+
+#titleblock {
+    display: flex;
+    align-items: center;
+    gap: 20px
+}
+
+#title {
+    white-space: nowrap;
+}
+
+#titleblock a {
+    position: absolute;
+    color: white;
+    right: 50px
+}
+
+#version {
+    color: lightgray;
+}
+
+#grid {
+    display: grid;
+    gap: 50px;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+}
+
+#message {
+    overflow-wrap: break-word;
+}
+
+.topbtn {
+    text-decoration: none;
+    font-family: "Menlo", "Consolas", "Lucida Console", monospace;
+    background: #1F1F1F;
+    font-size: large;
+    border: none;
+    color: white;
+    padding: 15px;
+    cursor: pointer;
+}
+
+p {
+    font-size: x-large;
+}
+
+.q {
+    color: lightgray;
+}
+
+.a {
+    color: #f42069;
+}

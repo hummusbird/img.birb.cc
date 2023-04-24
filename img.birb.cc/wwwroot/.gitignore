@@ -1,0 +1,7 @@
+*
+!*.html
+!*.js
+!*.css
+!css/
+!js/
+!favicon.png

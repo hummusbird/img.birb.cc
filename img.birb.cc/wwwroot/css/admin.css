@@ -1,0 +1,105 @@
+body {
+    padding-left: 40px;
+    padding-right: 40px;
+    background-color: black;
+    color: white;
+    font-family: "Menlo", "Consolas", "Lucida Console", monospace;
+    font-size: x-large;
+}
+
+.font {
+    color: white;
+    font-size: large;
+    font-family: "Menlo", "Consolas", "Lucida Console", monospace;
+}
+
+#titleblock {
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 20px
+}
+
+#titleblock a {
+    position: absolute;
+    font-size: x-large;
+    right: 50px
+}
+
+#newuserblock {
+    margin: 5px;
+    display: none
+}
+
+#newuserblock input {
+    width: 150px;
+    height: 48px;
+    margin: 5px;
+}
+
+h4 {
+    margin: 5px;
+    padding: 0;
+    align-self: center;
+    padding-right: 30px;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+#loginarea {
+    display: flex;
+    flex-direction: row;
+}
+
+#submitnewuser {
+    margin: 5px;
+}
+
+textarea {
+    margin: 5px;
+    width: calc(100% - 30px);
+    background-color: #1F1F1F;
+    border: none;
+    height: 25px;
+    text-align: left;
+    padding: 15px;
+    resize: none;
+}
+
+button {
+    background-color: #1F1F1F;
+    margin-left: 30px;
+    width: 100px;
+    height: 50px;
+    border: none;
+    cursor: pointer;
+}
+
+#loginbutton:active {
+    background-color: #131313;
+}
+
+input {
+    background-color: #1F1F1F;
+    border: none;
+    width: 400px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+table,
+th,
+td {
+    border: 1px solid;
+    padding-left: 10px;
+    border-color: rgb(255, 255, 255);
+    border-collapse: collapse;
+}
+
+#table {
+    display: none;
+    width: 100%;
+    margin-bottom: 70px;
+}

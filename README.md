@@ -1,39 +1,37 @@
 # img.birb.cc
 
-img.birb.cc is a ShareX compatible C# image host, privately hosted by me.
+img.birb.cc is a ShareX compatible C# image host, privately hosted by me
 
-no, you cannot have an API key.
+no, you cannot have an API key
 
 ## how to host yourself
 
-- clone the repo.
-- install NGINX and dotnet.
-- use this config in nginx
+- download the latest release
+
+- run the executable alongside the `wwwroot` folder
+
+- a default admin api key will be generated for you - use this to add new accounts from the admin page
+
+you may also build the program yourself using `build.sh` or `build.bat`
+
+## config file
+
+the first time you run the program, a `config.json` file is generated
+
+this file contains settings and preferences for your image host:
 
 ```
-        location / {
-                try_files $uri $uri/ =404;
-        }
+DefaultDomain: set this to the default domain of your website 
 
-        location /api/ {
+UserDBPath: path to user json file
 
-                add_header 'Access-Control-Allow-Origin' '*' always;
+FileDBPath: path to file json file
 
-                proxy_pass      https://127.0.0.1:5001;
-                proxy_http_version      1.1;
-                proxy_set_header        Upgrade $http_upgrade;
-                proxy_set_header        Connection keep-alive;
-                proxy_set_header        Host $host;
-                proxy_cache_bypass      $http_upgrade;
-                proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
-                proxy_set_header        X-Forwarded-Proto $scheme;
-        }
-}
+LoggingEnabled: disables / enables logging
+
+AllowedFileTypes: an array of magic headers for allowed filetypes. 
+see https://en.wikipedia.org/wiki/List_of_file_signatures
 ```
-
-- symlink or set the root folder to /img/
-- run the .dll
-- a default admin api key will be generated. Use this to add new accounts.
 
 ## valid endpoints
 
