@@ -14,7 +14,7 @@ public class User
     public string Domain = Config.DefaultDomain!;
     public string? DashMsg;
     public bool ShowURL;
-    public bool StripEXIF;
+    public bool StripEXIF = true;
 
     public UsersDTO UsersToDTO() // public user info
     {
