@@ -32,15 +32,12 @@ public class Img
     {
         if (Config.AllowedFileTypes!.Count == 0) { return true; } // if no filetypes listed, allow all
 
-        if (stream.Length < 16) { return false; } // if file header too small, reject
-
-        string magicbytes = "";
         stream.Position = 0;
 
-        for (int i = 0; i < 16; i++) // load first 16 bytes from file
-        {
-            magicbytes += (stream.ReadByte().ToString("X2")); // convert from int to hex
-        }
+        byte[] header = new byte[16]; // new 16 byte buffer
+        int num = stream.Read(header, 0, 16); // read first 16 bytes
+
+        string magicbytes = BitConverter.ToString(header).Replace("-", ""); // convert byte array to hex string
 
         foreach (string allowedMagicBytes in Config.AllowedFileTypes!.Where(allowedMagicBytes => magicbytes.Contains(allowedMagicBytes)))
         { // compare to list of allowed filetypes
