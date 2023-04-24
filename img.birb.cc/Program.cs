@@ -155,12 +155,18 @@ app.MapPost("/api/usr/settings", async Task<IResult> (HttpRequest request) => //
     var domain = form.ToList().Find(newDomain => newDomain.Key == "domain");
     var dashMsg = form.ToList().Find(dashMsg => dashMsg.Key == "dashMsg");
     var showURL = form.ToList().Find(showURL => showURL.Key == "showURL");
+    var stripExif = form.ToList().Find(stripExif => stripExif.Key == "stripEXIF");
 
     User user = UserDB.GetUserFromKey(key.Value);
 
     if (!string.IsNullOrEmpty(showURL.Value) && showURL.Value == "true" || showURL.Value == "false")
     {
         user.ShowURL = System.Convert.ToBoolean(showURL.Value);
+    }
+
+    if (!string.IsNullOrEmpty(stripExif.Value) && stripExif.Value == "true" || stripExif.Value == "false")
+    {
+        user.StripEXIF = System.Convert.ToBoolean(stripExif.Value);
     }
 
     if (!string.IsNullOrEmpty(dashMsg.Value))
@@ -272,9 +278,11 @@ app.MapPost("/api/upload", async (http) => // upload file
         }
     }
 
-    stream = Img.StripExif(stream);
-
     User user = UserDB.GetUserFromKey(key.Value);
+
+    if (user.StripEXIF) { stream = Img.StripExif(stream); }
+    else { Log.Warning("Exif NOT stripped - user disabled"); }
+
     Img newFile = new Img().NewImg(user.UID, extension, img);
 
     using (var filestream = System.IO.File.Create("wwwroot/" + newFile.Filename))
