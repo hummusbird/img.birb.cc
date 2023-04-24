@@ -27,6 +27,28 @@ public class Img
         FileDB.Add(this);
         return (this);
     }
+
+    public static bool HasAllowedMagicBytes(Stream stream)
+    {
+        if (Config.AllowedFileTypes!.Count == 0) { return true; } // if no filetypes listed, allow all
+
+        if (stream.Length < 16) { return false; } // if file header too small, reject
+
+        string magicbytes = "";
+        stream.Position = 0;
+
+        for (int i = 0; i < 16; i++) // load first 16 bytes from file
+        {
+            magicbytes += (stream.ReadByte().ToString("X2")); // convert from int to hex
+        }
+
+        foreach (string allowedMagicBytes in Config.AllowedFileTypes!.Where(allowedMagicBytes => magicbytes.Contains(allowedMagicBytes)))
+        { // compare to list of allowed filetypes
+            return true;
+        }
+
+        return false;
+    }
 }
 
 public class Stats
