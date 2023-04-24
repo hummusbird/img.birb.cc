@@ -34,8 +34,8 @@ public class Img
 
         stream.Position = 0;
 
-        byte[] header = new byte[16]; // new 16 byte buffer
-        int num = stream.Read(header, 0, 16); // read first 16 bytes
+        byte[] header = new byte[16];
+        stream.Read(header, 0, 16); // read first 16 bytes
 
         string magicbytes = BitConverter.ToString(header).Replace("-", ""); // convert byte array to hex string
 
