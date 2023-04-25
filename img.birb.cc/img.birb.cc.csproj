@@ -11,6 +11,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Update="*.json" CopyToPublishDirectory="Never" />
+    <Content Update="appsettings.json" CopyToPublishDirectory="Always" />
+    <Content Update="wwwroot/*" CopyToPublishDirectory="Never" />
+    <Content Update="wwwroot/css/*" CopyToPublishDirectory="Always" />
+    <Content Update="wwwroot/js/*" CopyToPublishDirectory="Always" />
+    <Content Update="wwwroot/*.html" CopyToPublishDirectory="Always" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
   </ItemGroup>
 
