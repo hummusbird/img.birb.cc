@@ -4,12 +4,9 @@ using System.Text.RegularExpressions;
 
 // TODO:
 
-// make a release
-// key rotation
-// EXIF strip
+// key reset
 // checksum + multiple file check
 // invite gen
-// comments
 
 string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -31,7 +28,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 });
 
 app.UseHttpsRedirection();  // redirect 80 to 443
-app.UseDefaultFiles();      // use index.html & index.cs
+app.UseDefaultFiles();      // use index.html & index.css
 app.UseStaticFiles();       // enable static file serving
 app.UseCors(MyAllowSpecificOrigins);
 
