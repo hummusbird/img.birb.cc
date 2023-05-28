@@ -40,16 +40,16 @@ app.MapPost("/api/img", async Task<IResult> (HttpRequest request) => // get your
     var key = form.ToList().Find(key => key.Key == "api_key");
     var specified_uid = form.ToList().Find(uid => uid.Key == "uid");
 
-    if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null) // invalid key
+    if (key.Key is null || UserDB.GetUserFromKey(key.Value!) is null) // invalid key
     {
         return Results.Unauthorized();
     }
 
-    User user = UserDB.GetUserFromKey(key.Value);
+    User user = UserDB.GetUserFromKey(key.Value!);
 
-    if (specified_uid.Key is not null && UserDB.GetUserFromUID(int.Parse(specified_uid.Value)) is not null && UserDB.GetUserFromKey(key.Value).IsAdmin) // allow admins to request images via UID
+    if (specified_uid.Key is not null && UserDB.GetUserFromUID(int.Parse(specified_uid.Value!)) is not null && UserDB.GetUserFromKey(key.Value!).IsAdmin) // allow admins to request images via UID
     {
-        user = UserDB.GetUserFromUID(int.Parse(specified_uid.Value));
+        user = UserDB.GetUserFromUID(int.Parse(specified_uid.Value!));
     }
 
     List<Img> images = new List<Img>();
@@ -69,12 +69,12 @@ app.MapPost("/api/usr", async Task<IResult> (HttpRequest request) => // get your
     var form = await request.ReadFormAsync();
     var key = form.ToList().Find(key => key.Key == "api_key");
 
-    if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null) // invalid key
+    if (key.Key is null || UserDB.GetUserFromKey(key.Value!) is null) // invalid key
     {
         return Results.Unauthorized();
     }
 
-    return Results.Ok(UserDB.GetDB().Find(uid => uid.UID == UserDB.GetUserFromKey(key.Value).UID)!.UsrToDTO());
+    return Results.Ok(UserDB.GetDB().Find(uid => uid.UID == UserDB.GetUserFromKey(key.Value!).UID)!.UsrToDTO());
 });
 
 app.MapPost("/api/usr/new", async Task<IResult> (HttpRequest request) => // create new user
@@ -84,7 +84,7 @@ app.MapPost("/api/usr/new", async Task<IResult> (HttpRequest request) => // crea
     var form = await request.ReadFormAsync();
     var key = form.ToList().Find(key => key.Key == "api_key");
 
-    if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null || !UserDB.GetUserFromKey(key.Value).IsAdmin) // invalid key
+    if (key.Key is null || UserDB.GetUserFromKey(key.Value!) is null || !UserDB.GetUserFromKey(key.Value!).IsAdmin) // invalid key
     {
         return Results.Unauthorized();
     }
@@ -96,12 +96,12 @@ app.MapPost("/api/usr/new", async Task<IResult> (HttpRequest request) => // crea
     int NewUID = 0;
     string NewKey = Hashing.NewHash(40);
 
-    if (string.IsNullOrEmpty(username.Value) || UserDB.GetUserFromUsername(username.Value) is not null)
+    if (string.IsNullOrEmpty(username.Value) || UserDB.GetUserFromUsername(username.Value!) is not null)
     {
         return Results.BadRequest("Invalid Username");
     }
 
-    NewUsername = username.Value;
+    NewUsername = username.Value!;
 
     if (string.IsNullOrEmpty(UID.Value) || UID.Key is null)
     {
@@ -112,7 +112,7 @@ app.MapPost("/api/usr/new", async Task<IResult> (HttpRequest request) => // crea
     }
     else
     {
-        NewUID = int.Parse(UID.Value);
+        NewUID = int.Parse(UID.Value!);
         if (UserDB.GetUserFromUID(NewUID) is not null)
         {
             return Results.BadRequest("UID Taken");
@@ -144,7 +144,7 @@ app.MapPost("/api/usr/settings", async Task<IResult> (HttpRequest request) => //
     var form = await request.ReadFormAsync();
     var key = form.ToList().Find(key => key.Key == "api_key");
 
-    if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null) // invalid key
+    if (key.Key is null || UserDB.GetUserFromKey(key.Value!) is null) // invalid key
     {
         return Results.Unauthorized();
     }
@@ -154,7 +154,7 @@ app.MapPost("/api/usr/settings", async Task<IResult> (HttpRequest request) => //
     var showURL = form.ToList().Find(showURL => showURL.Key == "showURL");
     var stripExif = form.ToList().Find(stripExif => stripExif.Key == "stripEXIF");
 
-    User user = UserDB.GetUserFromKey(key.Value);
+    User user = UserDB.GetUserFromKey(key.Value!);
 
     if (!string.IsNullOrEmpty(showURL.Value) && showURL.Value == "true" || showURL.Value == "false")
     {
@@ -177,7 +177,7 @@ app.MapPost("/api/usr/settings", async Task<IResult> (HttpRequest request) => //
 
     if (!string.IsNullOrEmpty(domain.Value))
     {
-        user.Domain = domain.Value;
+        user.Domain = domain.Value!;
     }
 
     UserDB.Save();
@@ -192,12 +192,12 @@ app.MapPost("/api/users", async Task<IResult> (HttpRequest request) => // get re
     var form = await request.ReadFormAsync();
     var key = form.ToList().Find(key => key.Key == "api_key");
 
-    if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null) // invalid key
+    if (key.Key is null || UserDB.GetUserFromKey(key.Value!) is null) // invalid key
     {
         return Results.Unauthorized();
     }
 
-    if (UserDB.GetUserFromKey(key.Value).IsAdmin) // return private info for admins
+    if (UserDB.GetUserFromKey(key.Value!).IsAdmin) // return private info for admins
     {
         return Results.Ok(UserDB.GetDB().Select(x => x.UsrToDTO()).ToList());
     }
@@ -245,7 +245,7 @@ app.MapPost("/api/upload", async (http) => // upload file
     var form = await http.Request.ReadFormAsync();
     var key = form.ToList().Find(key => key.Key == "api_key");
 
-    if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null) // invalid key
+    if (key.Key is null || UserDB.GetUserFromKey(key.Value!) is null) // invalid key
     {
         http.Response.StatusCode = 401;
         return;
@@ -265,7 +265,7 @@ app.MapPost("/api/upload", async (http) => // upload file
     Stream? stream = new MemoryStream();
     await img.CopyToAsync(stream); // copy image to memorystream
 
-    if (UserDB.GetUserFromKey(key.Value).IsAdmin != true) // only check magic bytes for non-admins
+    if (UserDB.GetUserFromKey(key.Value!).IsAdmin != true) // only check magic bytes for non-admins
     {
         if (!Img.HasAllowedMagicBytes(stream))
         {
@@ -275,7 +275,7 @@ app.MapPost("/api/upload", async (http) => // upload file
         }
     }
 
-    User user = UserDB.GetUserFromKey(key.Value);
+    User user = UserDB.GetUserFromKey(key.Value!);
 
     if (user.StripEXIF) { stream = Img.StripExif(stream); }
     else { Log.Warning("Exif NOT stripped - user disabled"); }
@@ -307,7 +307,7 @@ app.MapDelete("/api/delete/{hash}", async Task<IResult> (HttpRequest request, st
     var form = await request.ReadFormAsync();
     var key = form.ToList().Find(key => key.Key == "api_key");
 
-    if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null) // invalid key
+    if (key.Key is null || UserDB.GetUserFromKey(key.Value!) is null) // invalid key
     {
         return Results.Unauthorized();
     }
@@ -319,7 +319,7 @@ app.MapDelete("/api/delete/{hash}", async Task<IResult> (HttpRequest request, st
         return Results.NotFound();
     }
 
-    if (deleteFile.UID == UserDB.GetUserFromKey(key.Value).UID || UserDB.GetUserFromKey(key.Value).IsAdmin)
+    if (deleteFile.UID == UserDB.GetUserFromKey(key.Value!).UID || UserDB.GetUserFromKey(key.Value!).IsAdmin)
     {
         FileDB.Remove(deleteFile);
         return Results.Ok();
@@ -335,12 +335,12 @@ app.MapDelete("/api/nuke", async Task<IResult> (HttpRequest request) => // delet
     var form = await request.ReadFormAsync();
     var key = form.ToList().Find(key => key.Key == "api_key");
 
-    if (key.Key is null || UserDB.GetUserFromKey(key.Value) is null) // invalid key
+    if (key.Key is null || UserDB.GetUserFromKey(key.Value!) is null) // invalid key
     {
         return Results.Unauthorized();
     }
 
-    FileDB.Nuke(UserDB.GetUserFromKey(key.Value));
+    FileDB.Nuke(UserDB.GetUserFromKey(key.Value!));
 
     return Results.Ok();
 });
