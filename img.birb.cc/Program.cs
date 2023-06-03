@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 // key reset
 // checksum + multiple file check
 // invite gen
+// albums
 
 string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);

@@ -1,5 +1,13 @@
 using Newtonsoft.Json;
 
+// TODO:
+// add endpoints for creating and deleting albums
+// create standard page for viewing (based off dashboard)
+// different content for owner vs public (settings available)
+// modify dashboard to add "add to album" button below every image
+// add album tag to enable automatic uploads
+// add batch uploads
+
 public class Album
 {
     public string? Hash { get; set; }
