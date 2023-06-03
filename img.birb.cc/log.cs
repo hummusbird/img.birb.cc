@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 
 public static partial class Log
 {
-    public static readonly TimeSpan MAX_LOG_AGE = new TimeSpan(days: 1, hours: 0, minutes: 0, seconds: 0);
+    public static readonly TimeSpan MAX_LOG_AGE = new TimeSpan(days: 32, hours: 0, minutes: 0, seconds: 0);
 
     private static string prefix = $"{DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss")}"; // log filename prefix
 
@@ -57,7 +57,9 @@ public static partial class Log
     {
         lock (LogMutex)
         {
-            string logMessage = $"[{level.ToString()}] [{DateTime.Now.ToString("HH:mm:ss.fff")}] [{new FileInfo(path.ToString()).Name}:{functionName}:{line}] {value}";
+            string logMessage = $"[{level.ToString()}] [{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}] ";
+            if (level == LogLevel.CRIT || level == LogLevel.DBUG) { logMessage += $"[{new FileInfo(path.ToString()).Name}:{functionName}:{line}] "; }
+            logMessage += value;
 
             Console.Write("[");
             Console.ForegroundColor = fg;
