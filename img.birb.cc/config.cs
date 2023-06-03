@@ -11,6 +11,7 @@ public class Settings
     public string? DefaultDomain;
     public string? UserDBPath;
     public string? FileDBPath;
+    public string? AlbumDBPath;
     public string? LogPath;
     public bool LoggingEnabled;
     public List<String>? AllowedFileTypes;
@@ -23,6 +24,7 @@ public static class Config
     public static string? DefaultDomain { get; private set; } = "img.birb.cc";
     public static string? UserDBPath { get; private set; } = "user.json";
     public static string? FileDBPath { get; private set; } = "img.json";
+    public static string? AlbumDBPath { get; private set; } = "album.json";
     public static string? LogPath { get; private set; } = "logs";
     public static bool LoggingEnabled { get; private set; } = false;
 
@@ -52,6 +54,7 @@ public static class Config
                 DefaultDomain = config!.DefaultDomain;
                 UserDBPath = config!.UserDBPath;
                 FileDBPath = config!.FileDBPath;
+                AlbumDBPath = config!.AlbumDBPath;
                 LogPath = config!.LogPath;
                 LoggingEnabled = config.LoggingEnabled;
                 AllowedFileTypes = config.AllowedFileTypes;
@@ -79,6 +82,7 @@ public static class Config
         config.DefaultDomain = DefaultDomain;
         config.UserDBPath = UserDBPath;
         config.FileDBPath = FileDBPath;
+        config.AlbumDBPath = AlbumDBPath;
         config.LogPath = LogPath;
         config.LoggingEnabled = LoggingEnabled;
         config.AllowedFileTypes = AllowedFileTypes;

@@ -25,7 +25,7 @@ public class Img
         UserDB.Save();
 
         FileDB.Add(this);
-        return (this);
+        return this;
     }
 
     public static bool HasAllowedMagicBytes(Stream stream)
