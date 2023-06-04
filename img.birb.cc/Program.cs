@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 // checksum + multiple file check
 // invite gen
 // albums
+// swap out all "form.tolists()" into one var per endpoint
 
 string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -314,6 +315,35 @@ app.MapPost("/api/album/new", async Task<IResult> (HttpRequest request) =>
     Album NewAlbum = new Album().NewAlbum(UserDB.GetUserFromKey(key.Value!).UID, name.Value!); // create new album, owned by user
 
     return Results.Ok(NewAlbum.Hash);
+});
+
+app.MapPost("/api/album/add", async Task<IResult> (HttpRequest request) =>
+{
+    if (!request.HasFormContentType) { return Results.BadRequest(); }
+
+    var form = await request.ReadFormAsync();
+    var key = form.ToList().Find(key => key.Key == "api_key");
+    var image = form.ToList().Find(key => key.Key == "hash");
+    var album = form.ToList().Find(key => key.Key == "album");
+
+    if (key.Key is null || UserDB.GetUserFromKey(key.Value!) is null) // invalid key
+    {
+        return Results.Unauthorized();
+    }
+
+    if (String.IsNullOrEmpty(image.Key) || String.IsNullOrEmpty(album.Key)) // bad image/album hash
+    {
+        return Results.BadRequest();
+    }
+
+    if (FileDB.Find(image.Key) is null || AlbumDB.Find(album.Key) is null) // couldn't find image/album
+    {
+        return Results.NotFound();
+    }
+
+    AlbumDB.AddImageToAlbum(image.Key, album.Key);
+
+    return Results.Ok();
 });
 
 app.MapDelete("/api/delete/{hash}", async Task<IResult> (HttpRequest request, string hash) => // delete specific file
