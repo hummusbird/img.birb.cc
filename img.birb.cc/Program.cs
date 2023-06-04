@@ -298,6 +298,21 @@ app.MapPost("/api/upload", async (http) => // upload file
     return;
 });
 
+app.MapPost("/api/album/new", async Task<IResult> (HttpRequest request) =>
+{
+    if (!request.HasFormContentType) { return Results.BadRequest(); }
+
+    var form = await request.ReadFormAsync();
+    var key = form.ToList().Find(key => key.Key == "api_key");
+
+    if (key.Key is null || UserDB.GetUserFromKey(key.Value!) is null) // invalid key
+    {
+        return Results.Unauthorized();
+    }
+
+    return Results.Ok();
+});
+
 app.MapDelete("/api/delete/{hash}", async Task<IResult> (HttpRequest request, string hash) => // delete specific file
 {
     if (!request.HasFormContentType || string.IsNullOrEmpty(hash))

@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 // add album tag to enable automatic uploads
 // add batch uploads
 
-// match accessors "init" with user object, remove NewAlbum()
+// match accessors "init" with user object, remove NewAlbum() // can't do this because of deserialisation shenanigans
 
 public class Album
 {
