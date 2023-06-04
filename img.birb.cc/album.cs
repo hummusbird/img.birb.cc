@@ -42,7 +42,9 @@ public class Album
 
     internal void AddImage(string filename)
     {
-        if (!ImageFilenames!.Contains(filename)) { ImageFilenames?.Add(filename); }
+        // if image is already in list, remove then add to front
+        if (ImageFilenames!.Contains(filename)) { ImageFilenames.Remove(filename); }
+        ImageFilenames?.Add(filename);
     }
 }
 
@@ -111,5 +113,11 @@ public static class AlbumDB
         Save();
 
         Log.Info("Removed album " + album.Hash);
+    }
+
+    public static void AddImageToAlbum(string imagehash, string albumhash)
+    {
+        string imageFilename = FileDB.Find(imagehash).Filename!;
+        AlbumDB.Find(albumhash).AddImage(imageFilename);
     }
 }
