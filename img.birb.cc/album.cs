@@ -19,7 +19,7 @@ public class Album
     public DateTime Timestamp { get; set; }
     public bool IsPublic { get; set; }
 
-    internal Album NewAlbum(int uid, string name = "", bool ispublic = false)
+    internal Album NewAlbum(int uid, string name = "")
     {
         string NewHash = Hashing.NewHash(6);
 
@@ -32,7 +32,7 @@ public class Album
         Name = String.IsNullOrEmpty(name) ? NewHash : name;
         ImageFilenames = new List<string>();
         UID = uid;
-        IsPublic = ispublic;
+        IsPublic = false;
         Timestamp = DateTime.Now;
 
         AlbumDB.New(this);
@@ -42,14 +42,8 @@ public class Album
 
     internal void AddImage(string filename)
     {
-        ImageFilenames?.Add(filename);
+        if (!ImageFilenames!.Contains(filename)) { ImageFilenames?.Add(filename); }
     }
-
-    internal void SetVisibility(bool ispublic)
-    {
-        IsPublic = ispublic;
-    }
-
 }
 
 public static class AlbumDB
