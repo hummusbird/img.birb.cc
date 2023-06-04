@@ -1,5 +1,8 @@
 using Newtonsoft.Json;
 
+// TODO:
+// get rid of GetDB and move uploaded bytes & count
+
 public class User
 {
     // public

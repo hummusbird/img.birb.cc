@@ -1,5 +1,8 @@
 using Newtonsoft.Json;
 
+// TODO:
+// get rid of FileDB.GetDB and create standard methods for length and all from specific user
+
 public class Img
 {
     public string? Hash { get; set; }
