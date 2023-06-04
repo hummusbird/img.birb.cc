@@ -351,5 +351,6 @@ Config.Load();
 Hashing.LoadSalt();
 FileDB.Load();
 UserDB.Load();
+AlbumDB.Load();
 
 app.Run();

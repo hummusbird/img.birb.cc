@@ -40,16 +40,16 @@ public static class AlbumDB
                 db = JsonConvert.DeserializeObject<List<Album>>(json)!;
                 Save();
             }
-            Log.Info($"{Config.FileDBPath} loaded - {db.Count} items");
+            Log.Info($"{Config.AlbumDBPath} loaded - {db.Count} items");
         }
         catch
         {
-            Log.Warning($"Unable to load {Config.FileDBPath}!");
+            Log.Warning($"Unable to load {Config.AlbumDBPath}!");
         }
 
-        if (!File.Exists(Config.FileDBPath!))
+        if (!File.Exists(Config.AlbumDBPath!))
         {
-            Log.Info($"Generating {Config.FileDBPath}...");
+            Log.Info($"Generating {Config.AlbumDBPath}...");
             Save();
         }
     }
@@ -58,21 +58,21 @@ public static class AlbumDB
     {
         try
         {
-            using (StreamWriter SW = new StreamWriter(Config.FileDBPath!, false))
+            using (StreamWriter SW = new StreamWriter(Config.AlbumDBPath!, false))
             {
                 SW.WriteLine(JsonConvert.SerializeObject(db, Formatting.Indented));
-                Log.Info($"{Config.FileDBPath!} saved!");
+                Log.Info($"{Config.AlbumDBPath!} saved!");
             }
         }
         catch
         {
-            Log.Critical($"Unable to save {Config.FileDBPath!}!");
+            Log.Critical($"Unable to save {Config.AlbumDBPath!}!");
         }
     }
 
     public static Album Find(string hash)
     {
-        return db.Find(file => file.Hash == hash);
+        return db.Find(album => album.Hash == hash);
     }
 
     public static void Add(Album album)
