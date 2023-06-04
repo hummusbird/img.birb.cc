@@ -8,26 +8,53 @@ using Newtonsoft.Json;
 // add album tag to enable automatic uploads
 // add batch uploads
 
+// match accessors "init" with user object, remove NewAlbum()
+
 public class Album
 {
     public string? Hash { get; set; }
     public string? Name { get; set; }
-    public List<Img>? Images { get; set; }
+    public List<string>? ImageFilenames { get; set; }
     public int UID { get; set; }
     public DateTime Timestamp { get; set; }
     public bool IsPublic { get; set; }
 
-    internal Album NewAlbum(int uid)
+    internal Album NewAlbum(int uid, string name = "", bool ispublic = false)
     {
+        string NewHash = Hashing.NewHash(6);
+
+        while (AlbumDB.Find(NewHash) is not null)
+        {
+            NewHash = Hashing.NewHash(6);
+        }
+
+        Hash = NewHash;
+        Name = String.IsNullOrEmpty(name) ? NewHash : name;
+        ImageFilenames = new List<string>();
+        UID = uid;
+        IsPublic = ispublic;
+        Timestamp = DateTime.Now;
+
+        AlbumDB.New(this);
+
         return this;
     }
+
+    internal void AddImage(string filename)
+    {
+        ImageFilenames?.Add(filename);
+    }
+
+    internal void SetVisibility(bool ispublic)
+    {
+        IsPublic = ispublic;
+    }
+
 }
 
 public static class AlbumDB
 {
     private static List<Album> db = new List<Album>();
-
-    public static List<Album> GetDB() { return db; }
 
     public static void Load()
     {
@@ -75,7 +102,7 @@ public static class AlbumDB
         return db.Find(album => album.Hash == hash);
     }
 
-    public static void Add(Album album)
+    public static void New(Album album)
     {
         if (Find(album.Hash!) is null)
         {
