@@ -304,13 +304,16 @@ app.MapPost("/api/album/new", async Task<IResult> (HttpRequest request) =>
 
     var form = await request.ReadFormAsync();
     var key = form.ToList().Find(key => key.Key == "api_key");
+    var name = form.ToList().Find(key => key.Key == "api_key");
 
     if (key.Key is null || UserDB.GetUserFromKey(key.Value!) is null) // invalid key
     {
         return Results.Unauthorized();
     }
 
-    return Results.Ok();
+    Album NewAlbum = new Album().NewAlbum(UserDB.GetUserFromKey(key.Value!).UID, name.Value!); // create new album, owned by user
+
+    return Results.Ok(NewAlbum.Hash);
 });
 
 app.MapDelete("/api/delete/{hash}", async Task<IResult> (HttpRequest request, string hash) => // delete specific file
