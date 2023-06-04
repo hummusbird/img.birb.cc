@@ -312,7 +312,12 @@ app.MapPost("/api/album/new", async Task<IResult> (HttpRequest request) =>
         return Results.Unauthorized();
     }
 
-    Album NewAlbum = new Album().NewAlbum(UserDB.GetUserFromKey(key.Value!).UID, name.Value!); // create new album, owned by user
+    User user = UserDB.GetUserFromKey(key.Value!);
+
+    Album NewAlbum = new Album().NewAlbum(user.UID, name.Value!); // create new album, owned by user
+
+    Log.Info($"New album: {NewAlbum.Hash}");
+    Log.Info($"UID: {user.UID} Username: {user.Username}");
 
     return Results.Ok(NewAlbum.Hash);
 });
@@ -341,7 +346,17 @@ app.MapPost("/api/album/add", async Task<IResult> (HttpRequest request) =>
         return Results.NotFound();
     }
 
+    User user = UserDB.GetUserFromKey(key.Value!);
+
+    if (AlbumDB.Find(album.Key).UID != user.UID) // user does not own album
+    {
+        return Results.Unauthorized();
+    }
+
     AlbumDB.AddImageToAlbum(image.Key, album.Key);
+
+    Log.Info($"Added image {image.Key} to album: {album.Key}");
+    Log.Info($"UID: {user.UID} Username: {user.Username}");
 
     return Results.Ok();
 });
