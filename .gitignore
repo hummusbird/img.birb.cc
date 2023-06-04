@@ -15,8 +15,6 @@ user.json
 config.json
 album.json
 
-.vscode/
-
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
