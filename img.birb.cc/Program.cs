@@ -400,6 +400,12 @@ app.MapPost("/api/album/remove", async Task<IResult> (HttpRequest request) =>
     return Results.Ok();
 });
 
+app.MapGet("/album/{hash}", (string hash) =>
+{
+    string html = System.IO.File.ReadAllText(@"./wwwroot/album.html");
+    return Results.Content(html, "text/html");
+});
+
 app.MapDelete("/api/delete/{hash}", async Task<IResult> (HttpRequest request, string hash) => // delete specific file
 {
     if (!request.HasFormContentType || string.IsNullOrEmpty(hash))
