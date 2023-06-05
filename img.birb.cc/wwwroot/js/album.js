@@ -3,6 +3,7 @@ const hash = window.location.pathname.replace("/album/", "");
 
 document.title = "album // " + hash; // todo: replace with album name
 
+let jsonout;
 let imgout;
 
 login();
@@ -11,17 +12,19 @@ async function login() {
     let formData = new FormData();
     formData.append("api_key", document.getElementById("keybox").value)
 
-    fetch(`https://${url}/api/album/${hash}/images`,
+    fetch(`${window.location.href}`,
         {
             body: formData,
             method: "post"
         }).then(res => res.json())
         .then(
             data => {
-                imgout = JSON.parse(data);
+                jsonout = JSON.parse(data)
+                imgout = jsonout['ImageFilenames'];
+
                 document.getElementById("bottombutton").style.display = "block";
                 document.getElementById("topbuttons").style.display = "initial";
-                document.getElementById("albumtitle").innerHTML = hash;
+                document.getElementById("albumtitle").innerHTML = jsonout['Name'];
                 document.getElementById("loginarea").style.display = "none";
             }
         )

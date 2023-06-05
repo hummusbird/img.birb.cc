@@ -406,7 +406,7 @@ app.MapGet("/album/{hash}", (string hash) =>
     return Results.Content(html, "text/html");
 });
 
-app.MapPost("/api/album/{hash}/images", async Task<IResult> (HttpRequest request, string hash) =>
+app.MapPost("/album/{hash}", async Task<IResult> (HttpRequest request, string hash) =>
 {
     if (!request.HasFormContentType) { return Results.BadRequest(); }
 
@@ -425,7 +425,7 @@ app.MapPost("/api/album/{hash}/images", async Task<IResult> (HttpRequest request
         return Results.BadRequest();
     }
 
-    string json = AlbumDB.GetImagesFromAlbum(hash, user);
+    string json = AlbumDB.GetAlbumAsJson(hash, user);
 
     return json is null ? Results.Unauthorized() : Results.Json(json);
 });
