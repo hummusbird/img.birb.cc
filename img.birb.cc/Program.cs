@@ -406,6 +406,30 @@ app.MapGet("/album/{hash}", (string hash) =>
     return Results.Content(html, "text/html");
 });
 
+app.MapPost("/api/album/{hash}/images", async Task<IResult> (HttpRequest request, string hash) =>
+{
+    if (!request.HasFormContentType) { return Results.BadRequest(); }
+
+    var form = await request.ReadFormAsync();
+    var key = form.ToList().Find(key => key.Key == "api_key");
+
+    User user = null!;
+
+    if (key.Key is not null || UserDB.GetUserFromKey(key.Value!) is not null) // valid key
+    {
+        user = UserDB.GetUserFromKey(key.Value!);
+    }
+
+    if (String.IsNullOrEmpty(hash) || AlbumDB.Find(hash) is null) // bad album hash
+    {
+        return Results.BadRequest();
+    }
+
+    string json = AlbumDB.GetImagesFromAlbum(hash, user);
+
+    return json is null ? Results.Unauthorized() : Results.Json(json);
+});
+
 app.MapDelete("/api/delete/{hash}", async Task<IResult> (HttpRequest request, string hash) => // delete specific file
 {
     if (!request.HasFormContentType || string.IsNullOrEmpty(hash))
