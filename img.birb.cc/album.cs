@@ -119,5 +119,7 @@ public static class AlbumDB
     {
         string imageFilename = FileDB.Find(imagehash).Filename!;
         AlbumDB.Find(albumhash).AddImage(imageFilename);
+
+        AlbumDB.Save();
     }
 }

@@ -305,7 +305,7 @@ app.MapPost("/api/album/new", async Task<IResult> (HttpRequest request) =>
 
     var form = await request.ReadFormAsync();
     var key = form.ToList().Find(key => key.Key == "api_key");
-    var name = form.ToList().Find(key => key.Key == "api_key");
+    var name = form.ToList().Find(key => key.Key == "name");
 
     if (key.Key is null || UserDB.GetUserFromKey(key.Value!) is null) // invalid key
     {
@@ -336,26 +336,26 @@ app.MapPost("/api/album/add", async Task<IResult> (HttpRequest request) =>
         return Results.Unauthorized();
     }
 
-    if (String.IsNullOrEmpty(image.Key) || String.IsNullOrEmpty(album.Key)) // bad image/album hash
+    if (String.IsNullOrEmpty(image.Value) || String.IsNullOrEmpty(album.Value)) // bad image/album hash
     {
         return Results.BadRequest();
     }
 
-    if (FileDB.Find(image.Key) is null || AlbumDB.Find(album.Key) is null) // couldn't find image/album
+    if (FileDB.Find(image.Value!) is null || AlbumDB.Find(album.Value!) is null) // couldn't find image/album
     {
         return Results.NotFound();
     }
 
     User user = UserDB.GetUserFromKey(key.Value!);
 
-    if (AlbumDB.Find(album.Key).UID != user.UID) // user does not own album
+    if (AlbumDB.Find(album.Value!).UID != user.UID) // user does not own album
     {
         return Results.Unauthorized();
     }
 
-    AlbumDB.AddImageToAlbum(image.Key, album.Key);
+    AlbumDB.AddImageToAlbum(image.Value!, album.Value!);
 
-    Log.Info($"Added image {image.Key} to album: {album.Key}");
+    Log.Info($"Added image {image.Value} to album: {album.Value}");
     Log.Info($"UID: {user.UID} Username: {user.Username}");
 
     return Results.Ok();
