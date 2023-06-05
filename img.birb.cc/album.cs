@@ -13,7 +13,7 @@ public class Album
 {
     public string? Hash { get; set; }
     public string? Name { get; set; }
-    public List<string>? ImageFilenames { get; set; }
+    public List<string>? ImageHashes { get; set; }
     public int UID { get; set; }
     public DateTime Timestamp { get; set; }
     public bool IsPublic { get; set; }
@@ -29,7 +29,7 @@ public class Album
 
         Hash = NewHash;
         Name = String.IsNullOrEmpty(name) ? NewHash : name;
-        ImageFilenames = new List<string>();
+        ImageHashes = new List<string>();
         UID = uid;
         IsPublic = false;
         Timestamp = DateTime.Now;
@@ -39,11 +39,11 @@ public class Album
         return this;
     }
 
-    internal void AddImage(string filename)
+    internal void AddImage(string hash)
     {
         // if image is already in list, remove then add to front
-        if (ImageFilenames!.Contains(filename)) { ImageFilenames.Remove(filename); }
-        ImageFilenames?.Add(filename);
+        if (ImageHashes!.Contains(hash)) { ImageHashes.Remove(hash); }
+        ImageHashes?.Add(hash);
     }
 }
 
@@ -110,33 +110,45 @@ public static class AlbumDB
     {
         db.Remove(album);
         Save();
-
         Log.Info("Removed album " + album.Hash);
     }
 
     public static void AddImageToAlbum(string imagehash, string albumhash)
     {
-        string imageFilename = FileDB.Find(imagehash).Filename!;
-        AlbumDB.Find(albumhash).AddImage(imageFilename);
-
-        AlbumDB.Save();
+        AlbumDB.Find(albumhash).AddImage(imagehash);
+        Save();
     }
 
     public static void RemoveImageFromAlbum(string imagehash, string albumhash)
     {
-        string imageFilename = FileDB.Find(imagehash).Filename!;
-        AlbumDB.Find(albumhash).ImageFilenames!.Remove(imageFilename);
-
-        AlbumDB.Save();
+        AlbumDB.Find(albumhash).ImageHashes!.Remove(imagehash);
+        Save();
     }
 
-    public static string GetAlbumAsJson(string albumhash, User user)
+    public static Album GetAlbum(string albumhash, User user) // checks permission compared to internal "find"
     {
         if (AlbumDB.Find(albumhash).IsPublic || (user is not null && AlbumDB.Find(albumhash).UID == user.UID))
         {
-            return JsonConvert.SerializeObject(AlbumDB.Find(albumhash));
+            return AlbumDB.Find(albumhash);
         }
 
-        return null; // return null if private & invalid UID provided (UID found from API key in /api/album/{hash}/images)
+        return null; // return null if private & invalid UID provided
+    }
+
+    public static List<Img> GetAlbumImages(string albumhash, User user) // checks permission compared to internal "find"
+    {
+        if (AlbumDB.Find(albumhash).IsPublic || (user is not null && AlbumDB.Find(albumhash).UID == user.UID))
+        {
+            List<Img> images = new List<Img>();
+
+            foreach (string image in AlbumDB.Find(albumhash).ImageHashes!)
+            {
+                images.Add(FileDB.Find(image));
+            }
+
+            return images;
+        }
+
+        return null; // return null if private & invalid UID provided
     }
 }
