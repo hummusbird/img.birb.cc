@@ -122,4 +122,12 @@ public static class AlbumDB
 
         AlbumDB.Save();
     }
+
+    public static void RemoveImageFromAlbum(string imagehash, string albumhash)
+    {
+        string imageFilename = FileDB.Find(imagehash).Filename!;
+        AlbumDB.Find(albumhash).ImageFilenames!.Remove(imageFilename);
+
+        AlbumDB.Save();
+    }
 }
