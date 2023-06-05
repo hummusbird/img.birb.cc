@@ -1,14 +1,14 @@
 using Newtonsoft.Json;
 
 // TODO:
-// add endpoints for creating and deleting albums
-// create standard page for viewing (based off dashboard)
 // different content for owner vs public (settings available)
 // modify dashboard to add "add to album" button below every image
 // add album tag to enable automatic uploads
 // add batch uploads
-
+// modify GetImagesFromAlbum to return the entire image object, so filenames etc can be included
+// create standard .js file for dashboard and album to have consistent functions and reduce complexity
 // match accessors "init" with user object, remove NewAlbum() // can't do this because of deserialisation shenanigans
+// create way of accessing album metadata (name, timestamp)
 
 public class Album
 {
@@ -129,5 +129,15 @@ public static class AlbumDB
         AlbumDB.Find(albumhash).ImageFilenames!.Remove(imageFilename);
 
         AlbumDB.Save();
+    }
+
+    public static string GetImagesFromAlbum(string albumhash, User user)
+    {
+        if (AlbumDB.Find(albumhash).IsPublic || (user is not null && AlbumDB.Find(albumhash).UID == user.UID))
+        {
+            return JsonConvert.SerializeObject(AlbumDB.Find(albumhash).ImageFilenames);
+        }
+
+        return null; // return null if private & invalid UID provided (UID found from API key in /api/album/{hash}/images)
     }
 }
