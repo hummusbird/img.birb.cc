@@ -3,10 +3,54 @@
 
 <head>
     <title>album</title>
-    <link rel="shortcut icon" type="image/png" href="favicon.png">
-    <link rel="stylesheet" href="./css/album.css">
+    <link rel="shortcut icon" type="image/png" href="../favicon.png">
+    <link rel="stylesheet" href="../css/dashboard.css">
 </head>
 
 <body>
-    <h1>example</h1>
+    <div id="titleblock">
+        <h1 id="albumtitle">album</h1>
+
+        <div id="topbuttons">
+            <button class="topbtn" onclick="downloadAll()">download</button>
+            <button class="topbtn" onclick="downloadZip()">download .zip</button>
+        </div>
+
+    </div>
+
+    <div id="loginarea">
+        <h4 id="loginstat">login:</h4>
+        <input id=keybox type="password" placeholder="api key">
+        <button id="loginbutton" onclick="login();">login</button>
+    </div>
+
+    <div id=images>
+
+    </div>
+
+    <div id=preview>
+        <button id=closePreview onclick="closePreview();">X</button>
+
+        <p id="preview_info">--</p>
+
+        <video id="preview_vid" src="" controls></video>
+        <img id="preview_img" src="">
+
+        <div id="preview_buttons">
+            <button id="delete" onclick="delimg();">delete</button>
+            <button id="copyurl" onclick="copyToClipboard();">copy URL</button>
+        </div>
+    </div>
+
+    <div id="bottombutton">
+        <button id="next" onclick="displayPage(-1)">&lt;</button>
+        <input id="pagenum" type="number" min=1 value=1>
+        <button id="next" onclick="displayPage(1)">&gt;</button>
+    </div>
+
+    <script src="../js/album.js"></script>
 </body>
+
+<footer>
+
+</footer>
