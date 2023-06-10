@@ -361,7 +361,7 @@ app.MapPost("/api/album/add", async Task<IResult> (HttpRequest request) =>
     return Results.Ok();
 });
 
-app.MapPost("/api/album/remove", async Task<IResult> (HttpRequest request) =>
+app.MapDelete("/api/album/delete", async Task<IResult> (HttpRequest request) =>
 {
     if (!request.HasFormContentType) { return Results.BadRequest(); }
 

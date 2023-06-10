@@ -27,6 +27,8 @@ UserDBPath: path to user json file
 
 FileDBPath: path to file json file
 
+AlbumDBPath: path to album json file
+
 LoggingEnabled: disables / enables logging
 
 AllowedFileTypes: an array of magic headers for allowed filetypes. 
@@ -51,6 +53,16 @@ GET /api/dashmsg
 GET /api/stats
 
 POST /api/img
+
+GET /album/{hash}
+
+POST /album/{hash}/images
+
+POST /album/{hash}/info
+
+POST /api/album/add
+
+DELETE /api/album/delete
 
 DELETE /api/delete/{hash}
 
