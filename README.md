@@ -35,6 +35,37 @@ AllowedFileTypes: an array of magic headers for allowed filetypes.
 see https://en.wikipedia.org/wiki/List_of_file_signatures
 ```
 
+## web server
+
+make sure you set up a web server to forward :5000 to :443, and check file uploads.
+
+example NGINX config:
+
+```
+server {
+        listen 443 ssl http2;
+        listen [::]:443 ssl http2;
+
+        server_name YOUR_DOMAIN_HERE;
+
+        location / {
+                add_header 'Access-Control-Allow-Origin' '*' always;
+
+                proxy_pass              http://localhost:5000;
+                proxy_http_version      1.1;
+                proxy_set_header        Upgrade $http_upgrade;
+                proxy_set_header        Connection keep-alive;
+                proxy_set_header        Host $host;
+                proxy_cache_bypass      $http_upgrade;
+                proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header        X-Forwarded-Proto $scheme;
+        }
+
+  ssl_certificate PATH_TO_CERT;
+  ssl_certificate_key PATH_TO_KEY;
+}
+```
+
 ## valid endpoints
 
 ```
