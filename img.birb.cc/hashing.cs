@@ -7,9 +7,10 @@ public static class Hashing
 
     public static void LoadSalt()
     {
+        var saltPath = Environment.GetEnvironmentVariable("SALT_PATH") ?? "salt.txt";
         try
         {
-            using (StreamReader SR = new StreamReader("salt.txt"))
+            using (StreamReader SR = new StreamReader(saltPath))
             {
                 salt = SR.ReadToEnd().Trim();
             }
@@ -20,10 +21,10 @@ public static class Hashing
             Log.Warning($"Unable to load salt");
         }
 
-        if (!File.Exists("salt.txt") || string.IsNullOrEmpty(salt))
+        if (!File.Exists(saltPath) || string.IsNullOrEmpty(salt))
         {
             Log.Info("Generating new salt. Keep this safe!!!");
-            using (StreamWriter SW = new StreamWriter("salt.txt"))
+            using (StreamWriter SW = new StreamWriter(saltPath))
             {
                 salt = NewHash(40);
                 SW.WriteLine(salt);

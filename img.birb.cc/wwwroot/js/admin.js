@@ -9,7 +9,7 @@ async function login() {
     let formData = new FormData();
     formData.append("api_key", document.getElementById("keybox").value)
 
-    fetch(`https://${url}/api/users`,
+    fetch(`/api/users`,
         {
             body: formData,
             method: "post"
@@ -35,7 +35,7 @@ async function getimgs(uid) {
 
     let imgs;
 
-    await fetch(`https://${url}/api/img`,
+    await fetch(`/api/img`,
         {
             body: formData,
             method: "post"
@@ -122,7 +122,7 @@ async function newuser(name, uid) {
 
     let token;
 
-    await fetch(`https://${url}/api/usr/new`,
+    await fetch(`/api/usr/new`,
         {
             body: formData,
             method: "post"
