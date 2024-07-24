@@ -8,6 +8,7 @@ RUN dotnet restore
 COPY img.birb.cc/. ./img.birb.cc/
 WORKDIR /source/img.birb.cc
 RUN dotnet publish -c release -o /app --no-restore --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true
+RUN mkdir /app/config /app/uploads && chown -R $APP_UID /app/config /app/uploads
 
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-noble-chiseled
 WORKDIR /app
