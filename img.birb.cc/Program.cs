@@ -30,10 +30,13 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 
 app.UseDefaultFiles();      // use index.html & index.css
 app.UseStaticFiles();       // enable static file serving
-app.UseStaticFiles(new StaticFileOptions
+if (Config.UploadsPath != "wwwroot")
 {
-    FileProvider = new PhysicalFileProvider(Config.UploadsPath)
-});
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(Config.UploadsPath)
+    });
+}
 app.UseCors(MyAllowSpecificOrigins);
 
 app.MapPost("/api/img", async Task<IResult> (HttpRequest request) => // get your uploaded files
