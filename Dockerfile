@@ -22,4 +22,6 @@ ENV UPLOADS_PATH=/app/uploads
 VOLUME /app/config
 VOLUME /app/uploads
 
+EXPOSE 5000
+
 ENTRYPOINT ["/app/img.birb.cc"]
