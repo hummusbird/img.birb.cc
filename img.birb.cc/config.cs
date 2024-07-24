@@ -18,12 +18,15 @@ public class Settings
 
 public static class Config
 {
-    private const string path = "config.json";
+    public static string UploadsPath = Environment.GetEnvironmentVariable("UPLOADS_PATH") ?? "wwwroot";
+
+    private static string configDirectory = Environment.GetEnvironmentVariable("CONFIG_PATH") ?? "";
+    private static string path = Path.Join(configDirectory, "config.json");
 
     public static string? DefaultDomain { get; private set; } = "img.birb.cc";
-    public static string? UserDBPath { get; private set; } = "user.json";
-    public static string? FileDBPath { get; private set; } = "img.json";
-    public static string? LogPath { get; private set; } = "logs";
+    public static string? UserDBPath { get; private set; } = Path.Join(configDirectory, "user.json");
+    public static string? FileDBPath { get; private set; } = Path.Join(configDirectory, "img.json");
+    public static string? LogPath { get; private set; } = Path.Join(configDirectory, "logs");
     public static bool LoggingEnabled { get; private set; } = false;
 
     public static List<String>? AllowedFileTypes { get; private set; } = new List<String>() {

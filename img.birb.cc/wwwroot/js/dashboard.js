@@ -11,7 +11,7 @@ async function login() {
     let formData = new FormData();
     formData.append("api_key", document.getElementById("keybox").value)
 
-    fetch(`https://${url}/api/usr`,
+    fetch(`/api/usr`,
         {
             body: formData,
             method: "post"
@@ -51,7 +51,7 @@ async function definitelyNuke() {
     let formData = new FormData();
     formData.append("api_key", document.getElementById("keybox").value)
 
-    fetch(`https://${url}/api/nuke`,
+    fetch(`/api/nuke`,
         {
             body: formData,
             method: "DELETE"
@@ -80,7 +80,7 @@ function displayPage(x) {
 
     for (var i = (pagecount - 1) * pagelength; i < length; i++) {
         var item = imgout[imgout.length - i - 1]["filename"].endsWith(".mp4") ? document.createElement("video") : document.createElement("img");
-        item.src = `https://${url}/` + imgout[imgout.length - i - 1]["filename"]
+        item.src = '/' + imgout[imgout.length - i - 1]["filename"]
         item.setAttribute("onclick", `display("${imgout[imgout.length - i - 1]["filename"]}","${imgout[imgout.length - i - 1]["timestamp"]}")`)
         document.getElementById("images").appendChild(item)
     }
@@ -90,7 +90,7 @@ function loadImages() {
     let formData = new FormData();
     formData.append("api_key", document.getElementById("keybox").value)
 
-    fetch(`https://${url}/api/img`,
+    fetch(`/api/img`,
         {
             body: formData,
             method: "post"
@@ -100,7 +100,9 @@ function loadImages() {
                 imgout = data
                 document.getElementById("files").innerHTML = usrout["uploadCount"] + " files uploaded"
                 document.getElementById("gb").innerHTML = bytes(usrout["uploadedBytes"]) + " uploaded"
-                document.getElementById("time").innerHTML = changeToTime(Math.round((new Date().getTime() - Date.parse(data[data.length - 1]["timestamp"])) / 1000 / 60)) + " since last upload"
+                if (data.length > 0) {
+                    document.getElementById("time").innerHTML = changeToTime(Math.round((new Date().getTime() - Date.parse(data[data.length - 1]["timestamp"])) / 1000 / 60)) + " since last upload"
+                }
 
                 displayPage()
             })
@@ -116,7 +118,7 @@ async function submitSettings() {
         formData.append("stripEXIF", document.getElementById("stripEXIF").checked)
         formData.append("dashMsg", document.getElementById("feedback").value)
 
-        fetch(`https://${url}/api/usr/settings`,
+        fetch(`/api/usr/settings`,
             {
                 body: formData,
                 method: "POST"
@@ -138,7 +140,7 @@ async function delimg(hash) {
     let formData = new FormData();
     formData.append("api_key", document.getElementById("keybox").value)
 
-    fetch(`https://${url}/api/delete/${hash}`,
+    fetch(`/api/delete/${hash}`,
         {
             body: formData,
             method: "DELETE"
@@ -167,12 +169,12 @@ function display(filename, timestamp) {
     document.getElementById("copyurl").setAttribute("onclick", "copyToClipboard(" + `"${(document.getElementById("showURL").checked ? "​" : "")}https://${url}/${filename}")`)
 
     if (filename.endsWith(".mp4")) {
-        document.getElementById("preview_vid").src = `https://${url}/` + filename
+        document.getElementById("preview_vid").src = '/' + filename
         document.getElementById("preview_vid").style.display = "initial"
         document.getElementById("preview_img").style.display = "none"
     }
     else {
-        document.getElementById("preview_img").src = `https://${url}/` + filename
+        document.getElementById("preview_img").src = '/' + filename
         document.getElementById("preview_img").style.display = "initial"
         document.getElementById("preview_vid").style.display = "none"
     }
@@ -272,7 +274,7 @@ document.getElementById("upload").addEventListener('change', async function () {
         formData.append("api_key", document.getElementById("keybox").value)
         formData.append("img", this.files[0])
 
-        fetch(`https://${url}/api/upload`,
+        fetch(`/api/upload`,
             {
                 body: formData,
                 method: "POST"

@@ -151,7 +151,7 @@ public static class FileDB
         db.Remove(file);
         Save();
 
-        File.Delete("wwwroot/" + file.Filename);
+        File.Delete(Path.Join(Config.UploadsPath, file.Filename));
         Log.Info("Removed file " + file.Filename);
     }
 
@@ -162,7 +162,7 @@ public static class FileDB
         foreach (Img img in images.Where(img => img.UID == user.UID))
         {
             db.Remove(img);
-            File.Delete("wwwroot/" + img.Filename);
+            File.Delete(Path.Join(Config.UploadsPath, img.Filename));
         }
         Log.Info($"nuked {user.Username}");
         Save();

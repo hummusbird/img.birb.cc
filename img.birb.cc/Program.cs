@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.FileProviders;
 using System.Text.RegularExpressions;
 
 // TODO:
@@ -27,9 +28,15 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 });
 
-app.UseHttpsRedirection();  // redirect 80 to 443
 app.UseDefaultFiles();      // use index.html & index.css
 app.UseStaticFiles();       // enable static file serving
+if (Config.UploadsPath != "wwwroot")
+{
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(Config.UploadsPath)
+    });
+}
 app.UseCors(MyAllowSpecificOrigins);
 
 app.MapPost("/api/img", async Task<IResult> (HttpRequest request) => // get your uploaded files
@@ -222,8 +229,8 @@ app.MapGet("/api/stats", async () => // get host stats
     stats.Files = FileDB.GetDB().Count;
     stats.Users = UserDB.GetDB().Count;
 
-    // iterate through every file in wwwroot, ignoring .* and *.html and favicon - then sum filesize.
-    DirectoryInfo dirInfo = new DirectoryInfo(@"wwwroot/");
+    // iterate through every file in uploads, ignoring .* and *.html and favicon - then sum filesize.
+    DirectoryInfo dirInfo = new DirectoryInfo(Config.UploadsPath);
     stats.Bytes = await Task.Run(() => dirInfo.EnumerateFiles("*", SearchOption.TopDirectoryOnly).Where(file => file.Extension != ".html" && !file.Name.StartsWith(".") && file.Name != "favicon.png").Sum(file => file.Length));
 
     // get timestamp of latest uploaded file
@@ -282,7 +289,7 @@ app.MapPost("/api/upload", async (http) => // upload file
 
     Img newFile = new Img().NewImg(user.UID, extension, img);
 
-    using (var filestream = System.IO.File.Create("wwwroot/" + newFile.Filename))
+    using (var filestream = System.IO.File.Create(Path.Join(Config.UploadsPath, newFile.Filename)))
     {
         stream.Position = 0;
         stream.CopyTo(filestream);
